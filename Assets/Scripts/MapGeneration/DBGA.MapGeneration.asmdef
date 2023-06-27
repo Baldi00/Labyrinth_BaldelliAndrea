@@ -1,0 +1,16 @@
+{
+    "name": "DBGA.MapGeneration",
+    "rootNamespace": "DBGA.MapGeneration",
+    "references": [
+        "GUID:80cf6d542c45dd444beb89886e91a6c3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
