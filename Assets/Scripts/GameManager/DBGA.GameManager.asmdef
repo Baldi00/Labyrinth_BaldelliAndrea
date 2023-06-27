@@ -1,0 +1,17 @@
+{
+    "name": "DBGA.GameManager",
+    "rootNamespace": "DBGA.GameManager",
+    "references": [
+        "GUID:296b8b5a06e507546a657e3dad37fb8b",
+        "GUID:80cf6d542c45dd444beb89886e91a6c3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
