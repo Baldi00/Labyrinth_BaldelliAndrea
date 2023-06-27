@@ -289,6 +289,8 @@ MonoBehaviour:
   generateRandomMap: 1
   gridSize: 20
   tilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
+  playerPrefab: {fileID: 8862266604122522133, guid: 16621445116d9bd46b53314e36b7ba59,
+    type: 3}
 --- !u!114 &1721960303
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -49,11 +49,11 @@ namespace DBGA.InputSystem
         {
             inputMoveEvent.direction = GetCurrentInputMovementDirection();
             if (inputMoveEvent.direction != Direction.None)
-                gameEventsManager.DispatchEvent(inputMoveEvent);
+                gameEventsManager.DispatchGameEvent(inputMoveEvent);
 
             inputArrowShotEvent.direction = GetCurrentArrowShotDirection();
             if (inputArrowShotEvent.direction != Direction.None)
-                gameEventsManager.DispatchEvent(inputArrowShotEvent);
+                gameEventsManager.DispatchGameEvent(inputArrowShotEvent);
         }
 
         private Direction GetCurrentInputMovementDirection()

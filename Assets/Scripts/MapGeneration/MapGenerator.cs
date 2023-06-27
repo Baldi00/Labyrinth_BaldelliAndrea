@@ -31,7 +31,7 @@ namespace DBGA.MapGeneration
                 for(int col = 0; col < gridSize; col++)
                 {
                     grid[row][col] = GetRandomTileFromAvailable(availableTilesWithProbability);
-                    grid[row][col].SetPosition(row, col);
+                    grid[row][col].SetPositionOnGrid(new Vector2Int(row, col));
                 }
             }
 

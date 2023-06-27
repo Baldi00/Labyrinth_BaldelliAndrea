@@ -10,13 +10,13 @@ namespace DBGA.EventSystem
     /// e.g.
     /// void Start()
     /// { 
-    ///     GameEventsManager.Instance.AddListener(this, typeof(MyCustomGameEvent));
+    ///     GameEventsManager.Instance.AddGameEventListener(this, typeof(MyCustomGameEvent));
     /// }
     /// 
-    /// Inside the implemented method ReceiveEvent you will receive the events you are listening to
+    /// Inside the implemented method ReceiveGameEvent you will receive the events you are listening to
     /// If your class is listening to multiple types of events remember to check which event you received
     /// e.g.
-    /// public void ReceiveEvent(GameEvent gameEvent)
+    /// public void ReceiveGameEvent(GameEvent gameEvent)
     /// {
     ///     if(gameEvent is MyCustomGameEvent myCustomGameEvent)
     ///     {
@@ -27,6 +27,6 @@ namespace DBGA.EventSystem
     /// </summary>
     public interface IGameEventsListener
     {
-        public void ReceiveEvent(GameEvent gameEvent);
+        public void ReceiveGameEvent(GameEvent gameEvent);
     }
 }

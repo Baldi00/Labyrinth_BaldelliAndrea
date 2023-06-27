@@ -11,22 +11,20 @@ namespace DBGA.Tiles
         [SerializeField]
         private List<Cross> availableCrossings;
 
-        private int positionX;
-        private int positionY;
+        private Vector2Int positionOnGrid;
         private bool hasMonser;
         private bool hasWell;
         private bool hasTeleport;
         private bool playerExplored;
 
+
         /// <summary>
-        /// Sets the position of the tile on X and Y
+        /// Sets the position of the tile on the grid
         /// </summary>
-        /// <param name="positionX">The X position</param>
-        /// <param name="positionY">The Y position</param>
-        public void SetPosition(int positionX, int positionY)
+        /// <param name="positionOnGrid">The position on the grid</param>
+        public void SetPositionOnGrid(Vector2Int positionOnGrid)
         {
-            this.positionX = positionX;
-            this.positionY = positionY;
+            this.positionOnGrid = positionOnGrid;
         }
 
         /// <summary>
