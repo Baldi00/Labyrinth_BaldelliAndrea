@@ -1,8 +1,9 @@
 {
-    "name": "DBGA.EventSystem",
-    "rootNamespace": "DBGA.EventSystem",
+    "name": "DBGA.InputSystem",
+    "rootNamespace": "DBGA.InputSystem",
     "references": [
-        "GUID:1685e315984f6694bbb59dbdf88e6344"
+        "GUID:1685e315984f6694bbb59dbdf88e6344",
+        "GUID:16aaaf736409c2544a9e35f561aac75c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

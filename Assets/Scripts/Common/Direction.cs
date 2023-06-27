@@ -1,10 +1,11 @@
-namespace DBGA.Tiles
+namespace DBGA.Common
 {
     public enum Direction
     {
         Up,
         Down,
         Left,
-        Right
+        Right,
+        None
     }
 }

@@ -251,6 +251,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1721960301}
   - component: {fileID: 1721960302}
+  - component: {fileID: 1721960303}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -288,3 +289,25 @@ MonoBehaviour:
   generateRandomMap: 1
   gridSize: 20
   tilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
+--- !u!114 &1721960303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1721960299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f158c61b0acf6314b94f7eebaa750e46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementInputs:
+    moveUp: 119
+    moveDown: 115
+    moveLeft: 97
+    moveRight: 100
+  arrowShootingInputs:
+    shootUp: 105
+    shootDown: 107
+    shootLeft: 106
+    shootRight: 108
