@@ -13,6 +13,12 @@ namespace DBGA.MapGeneration
             public float max;
         }
 
+        /// <summary>
+        /// Generates a random map of tiles with the given size and tiles from the given list
+        /// </summary>
+        /// <param name="gridSize">The size of the resulting grid map (e.g. if 20 the result is a 20x20 grid)</param>
+        /// <param name="tileList">The list of available tiles</param>
+        /// <returns>A random grid of tiles with the given size and tiles</returns>
         public static Tile[][] GenerateMap(int gridSize, TilesList tileList)
         {
             Dictionary<ProbabilityRange, Tile> availableTilesWithProbability = InitializeTilesAndProbability(tileList);
@@ -32,6 +38,11 @@ namespace DBGA.MapGeneration
             return grid;
         }
 
+        /// <summary>
+        /// Initializes the tiles probabilities in order to pick them in a weighted way
+        /// </summary>
+        /// <param name="tileList">The list of available tiles with their probability weights</param>
+        /// <returns>The initialized list of tiles with probability ranges</returns>
         private static Dictionary<ProbabilityRange, Tile> InitializeTilesAndProbability(TilesList tileList)
         {
             float totalTilesProbabilityWeight = 0;
@@ -52,6 +63,11 @@ namespace DBGA.MapGeneration
             return availableTilesWithProbability;
         }
 
+        /// <summary>
+        /// Returns a weighted random tile between the available ones
+        /// </summary>
+        /// <param name="availableTilesWithProbability">The list of available tiles with probability ranges</param>
+        /// <returns>A weighted random tile between the available ones</returns>
         private static Tile GetRandomTileFromAvailable(Dictionary<ProbabilityRange, Tile> availableTilesWithProbability)
         {
             float randomNumber = Random.Range(0f, 1f);

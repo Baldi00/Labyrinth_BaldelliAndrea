@@ -20,16 +20,22 @@ namespace DBGA.GameManager
         void Awake()
         {
             if (generateRandomMap)
-            {
-                grid = MapGenerator.GenerateMap(gridSize, tilesList);
-                for (int row = 0; row < gridSize; row++)
-                    for (int col = 0; col < gridSize; col++)
-                        Instantiate(
-                            grid[row][col].gameObject,
-                            new Vector3(row, 0f, col),
-                            Quaternion.identity,
-                            transform);
-            }
+                GenerateAndInstantiateRandomMap();
+        }
+
+        /// <summary>
+        /// Generates and instantiates a random grid map
+        /// </summary>
+        private void GenerateAndInstantiateRandomMap()
+        {
+            grid = MapGenerator.GenerateMap(gridSize, tilesList);
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    Instantiate(
+                        grid[row][col].gameObject,
+                        new Vector3(row, 0f, col),
+                        Quaternion.identity,
+                        transform);
         }
     }
 }
