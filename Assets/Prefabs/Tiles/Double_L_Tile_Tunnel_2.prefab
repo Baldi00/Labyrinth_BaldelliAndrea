@@ -136,9 +136,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   availableCrossings:
-  - direction1: 3
-    direction2: 1
   - direction1: 2
+    direction2: 1
+  - direction1: 3
     direction2: 0
 --- !u!1 &3422268535631499709
 GameObject:

@@ -388,9 +388,9 @@ MonoBehaviour:
   - direction1: 0
     direction2: 1
   - direction1: 0
-    direction2: 3
+    direction2: 2
   - direction1: 1
-    direction2: 3
+    direction2: 2
 --- !u!1 &6646366335969066880
 GameObject:
   m_ObjectHideFlags: 0
