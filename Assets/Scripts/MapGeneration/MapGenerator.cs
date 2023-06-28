@@ -1,11 +1,12 @@
 using DBGA.Tiles;
+using DBGA.Common;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.MapGeneration
 {
     [DisallowMultipleComponent]
-    public class MapGenerator
+    public class MapGenerator : MonoBehaviour
     {
         public struct ProbabilityRange
         {
@@ -13,27 +14,41 @@ namespace DBGA.MapGeneration
             public float max;
         }
 
+        private int gridSize;
+        private TilesList tilesList;
+        private Tile[][] grid;
+        private Dictionary<ProbabilityRange, GameObject> availableTilesWithProbability;
+
         /// <summary>
         /// Generates a random map of tiles with the given size and tiles from the given list
         /// </summary>
         /// <param name="gridSize">The size of the resulting grid map (e.g. if 20 the result is a 20x20 grid)</param>
         /// <param name="tileList">The list of available tiles</param>
         /// <returns>A random grid of tiles with the given size and tiles</returns>
-        public static Tile[][] GenerateMap(int gridSize, TilesList tileList)
+        public Tile[][] GenerateMap(int gridSize, TilesList tilesList)
         {
-            Dictionary<ProbabilityRange, Tile> availableTilesWithProbability = InitializeTilesAndProbability(tileList);
+            this.gridSize = gridSize;
+            this.tilesList = tilesList;
+            
+            InitializeTilesAndProbability();
 
-            Tile[][] grid = new Tile[gridSize][];
+            grid = new Tile[gridSize][];
 
             for (int row = 0; row < gridSize; row++)
             {
                 grid[row] = new Tile[gridSize];
                 for (int col = 0; col < gridSize; col++)
                 {
-                    grid[row][col] = GetRandomTileFromAvailable(availableTilesWithProbability);
+                    GameObject randomTileGameObject = GetRandomTileFromAvailable();
+                    GameObject tileInstanceGameObject = 
+                        Instantiate(randomTileGameObject, new Vector3(row, 0f, col), Quaternion.identity, transform);
+
+                    grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
                     grid[row][col].SetPositionOnGrid(new Vector2Int(row, col));
                 }
             }
+
+            RemoveInvalidCrossings();
 
             return grid;
         }
@@ -41,17 +56,16 @@ namespace DBGA.MapGeneration
         /// <summary>
         /// Initializes the tiles probabilities in order to pick them in a weighted way
         /// </summary>
-        /// <param name="tileList">The list of available tiles with their probability weights</param>
-        /// <returns>The initialized list of tiles with probability ranges</returns>
-        private static Dictionary<ProbabilityRange, Tile> InitializeTilesAndProbability(TilesList tileList)
+        private void InitializeTilesAndProbability()
         {
+            availableTilesWithProbability = new Dictionary<ProbabilityRange, GameObject>();
+
             float totalTilesProbabilityWeight = 0;
-            foreach (TileListItem tileListItem in tileList.availableTiles)
+            foreach (TileListItem tileListItem in tilesList.availableTiles)
                 totalTilesProbabilityWeight += tileListItem.probabilityWeight;
 
-            Dictionary<ProbabilityRange, Tile> availableTilesWithProbability = new Dictionary<ProbabilityRange, Tile>();
             float previousRangeMin = 0f;
-            foreach (TileListItem tileListItem in tileList.availableTiles)
+            foreach (TileListItem tileListItem in tilesList.availableTiles)
             {
                 float rangeMax = previousRangeMin + tileListItem.probabilityWeight / totalTilesProbabilityWeight;
                 ProbabilityRange probabilityRange = new() { min = previousRangeMin, max = rangeMax };
@@ -61,23 +75,78 @@ namespace DBGA.MapGeneration
 
                 previousRangeMin = rangeMax;
             }
-
-            return availableTilesWithProbability;
         }
 
         /// <summary>
         /// Returns a weighted random tile between the available ones
         /// </summary>
-        /// <param name="availableTilesWithProbability">The list of available tiles with probability ranges</param>
         /// <returns>A weighted random tile between the available ones</returns>
-        private static Tile GetRandomTileFromAvailable(Dictionary<ProbabilityRange, Tile> availableTilesWithProbability)
+        private GameObject GetRandomTileFromAvailable()
         {
             float randomNumber = Random.Range(0f, 1f);
-            foreach (KeyValuePair<ProbabilityRange, Tile> tile in availableTilesWithProbability)
+            foreach (KeyValuePair<ProbabilityRange, GameObject> tile in availableTilesWithProbability)
                 if (randomNumber >= tile.Key.min && randomNumber < tile.Key.max)
                     return tile.Value;
 
             return null;
+        }
+
+        private void RemoveInvalidCrossings()
+        {
+            // Remove border crossings
+            for (int row = 0; row < gridSize; row++)
+            {
+                for (int col = 0; col < gridSize; col++)
+                {
+                    if (row == 0)
+                        grid[col][row].RemoveCrossWithDirection(Direction.Down);
+                    if (row == gridSize - 1)
+                        grid[col][row].RemoveCrossWithDirection(Direction.Up);
+                    if (col == 0)
+                        grid[col][row].RemoveCrossWithDirection(Direction.Left);
+                    if (col == gridSize - 1)
+                        grid[col][row].RemoveCrossWithDirection(Direction.Right);
+                }
+            }
+
+            // Remove invalid crossings between tiles
+            for (int row = 1; row < gridSize; row++)
+            {
+                for (int col = 1; col < gridSize; col++)
+                {
+                    if (grid[col - 1][row - 1].CrossingsContainDirection(Direction.Up) &&
+                        !grid[col][row - 1].CrossingsContainDirection(Direction.Down))
+                        grid[col - 1][row - 1].RemoveCrossWithDirection(Direction.Up);
+
+                    if (grid[col][row - 1].CrossingsContainDirection(Direction.Down) &&
+                        !grid[col - 1][row - 1].CrossingsContainDirection(Direction.Up))
+                        grid[col][row - 1].RemoveCrossWithDirection(Direction.Down);
+
+                    if (grid[col - 1][row - 1].CrossingsContainDirection(Direction.Right) &&
+                        !grid[col - 1][row].CrossingsContainDirection(Direction.Left))
+                        grid[col - 1][row - 1].RemoveCrossWithDirection(Direction.Right);
+
+                    if (grid[col - 1][row].CrossingsContainDirection(Direction.Left) &&
+                        !grid[col - 1][row - 1].CrossingsContainDirection(Direction.Right))
+                        grid[col - 1][row].RemoveCrossWithDirection(Direction.Left);
+
+                    if (grid[col - 1][row].CrossingsContainDirection(Direction.Up) &&
+                        !grid[col][row].CrossingsContainDirection(Direction.Down))
+                        grid[col - 1][row].RemoveCrossWithDirection(Direction.Up);
+
+                    if (grid[col][row].CrossingsContainDirection(Direction.Down) &&
+                        !grid[col - 1][row].CrossingsContainDirection(Direction.Up))
+                        grid[col][row].RemoveCrossWithDirection(Direction.Down);
+
+                    if (grid[col][row - 1].CrossingsContainDirection(Direction.Right) &&
+                        !grid[col][row].CrossingsContainDirection(Direction.Left))
+                        grid[col][row - 1].RemoveCrossWithDirection(Direction.Right);
+
+                    if (grid[col][row].CrossingsContainDirection(Direction.Left) &&
+                        !grid[col][row - 1].CrossingsContainDirection(Direction.Right))
+                        grid[col][row].RemoveCrossWithDirection(Direction.Left);
+                }
+            }
         }
     }
 }

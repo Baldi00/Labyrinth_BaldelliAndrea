@@ -2,7 +2,8 @@
     "name": "DBGA.MapGeneration",
     "rootNamespace": "DBGA.MapGeneration",
     "references": [
-        "GUID:80cf6d542c45dd444beb89886e91a6c3"
+        "GUID:80cf6d542c45dd444beb89886e91a6c3",
+        "GUID:1685e315984f6694bbb59dbdf88e6344"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

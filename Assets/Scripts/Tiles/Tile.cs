@@ -9,14 +9,13 @@ namespace DBGA.Tiles
     public class Tile : MonoBehaviour
     {
         [SerializeField]
-        private List<Cross> availableCrossings;
+        private Cross[] availableCrossings;
 
         private Vector2Int positionOnGrid;
         private bool hasMonser;
         private bool hasWell;
         private bool hasTeleport;
         private bool playerExplored;
-
 
         /// <summary>
         /// Sets the position of the tile on the grid
@@ -49,6 +48,39 @@ namespace DBGA.Tiles
                 availableDirections.Add(cross.direction2);
             }
             return availableDirections.ToList<Direction>();
+        }
+
+        /// <summary>
+        /// Remove all crossings that can go to or from the given direction
+        /// </summary>
+        /// <param name="direction">The direction to remove from available crossings</param>
+        public void RemoveCrossWithDirection(Direction direction)
+        {
+            List<Cross> availableCrossingsList = availableCrossings.ToList<Cross>();
+            List<Cross> toRemove = new List<Cross>();
+
+            foreach(Cross cross in availableCrossingsList)
+                if (cross.direction1 == direction || cross.direction2 == direction)
+                    toRemove.Add(cross);
+
+            foreach (Cross cross in toRemove)
+                availableCrossingsList.Remove(cross);
+
+            availableCrossings = availableCrossingsList.ToArray<Cross>();
+        }
+
+        /// <summary>
+        /// Checks if there is a crossing that goes from or to the given direction
+        /// </summary>
+        /// <param name="direction">The direction to test</param>
+        /// <returns>True if there is a crossing that goes from or to the given direction, false otherwise</returns>
+        public bool CrossingsContainDirection(Direction direction)
+        {
+            foreach (Cross cross in availableCrossings)
+                if (cross.direction1 == direction || cross.direction2 == direction)
+                    return true;
+
+            return false;
         }
     }
 }
