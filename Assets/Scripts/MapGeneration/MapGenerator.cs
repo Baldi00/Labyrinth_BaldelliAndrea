@@ -29,7 +29,7 @@ namespace DBGA.MapGeneration
         {
             this.gridSize = gridSize;
             this.tilesList = tilesList;
-            
+
             InitializeTilesAndProbability();
 
             grid = new Tile[gridSize][];
@@ -40,13 +40,16 @@ namespace DBGA.MapGeneration
                 for (int col = 0; col < gridSize; col++)
                 {
                     GameObject randomTileGameObject = GetRandomTileFromAvailable();
-                    GameObject tileInstanceGameObject = 
+                    GameObject tileInstanceGameObject =
                         Instantiate(randomTileGameObject, new Vector3(row, 0f, col), Quaternion.identity, transform);
 
                     grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
-                    grid[row][col].SetPositionOnGrid(new Vector2Int(row, col));
+                    grid[row][col].PositionOnGrid = new Vector2Int(row, col);
                 }
             }
+
+            SetupTunnelAdjacentTiles();
+
             return grid;
         }
 
@@ -86,6 +89,36 @@ namespace DBGA.MapGeneration
                     return tile.Value;
 
             return null;
+        }
+
+        private void SetupTunnelAdjacentTiles()
+        {
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    if (grid[row][col].gameObject.CompareTag("Tunnel"))
+                    {
+                        Tunnel tunnelTile = grid[row][col] as Tunnel;
+                        foreach (Direction direction in tunnelTile.GetAvailableDirections())
+                            switch (direction)
+                            {
+                                case Direction.Right:
+                                    if (row < gridSize - 1)
+                                        tunnelTile.AddAdjacentTile(Direction.Right, grid[row + 1][col]);
+                                    break;
+                                case Direction.Left:
+                                    if (row > 0)
+                                        tunnelTile.AddAdjacentTile(Direction.Left, grid[row - 1][col]);
+                                    break;
+                                case Direction.Up:
+                                    if (col < gridSize - 1)
+                                        tunnelTile.AddAdjacentTile(Direction.Up, grid[row][col + 1]);
+                                    break;
+                                case Direction.Down:
+                                    if (col > 0)
+                                        tunnelTile.AddAdjacentTile(Direction.Down, grid[row][col - 1]);
+                                    break;
+                            }
+                    }
         }
     }
 }

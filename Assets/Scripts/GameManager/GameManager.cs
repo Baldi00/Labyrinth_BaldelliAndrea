@@ -80,7 +80,7 @@ namespace DBGA.GameManager
             List<Direction> availableDirections = GetPlayerTile().GetAvailableDirections();
             Vector2Int nextPosition = GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
 
-            bool successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition);
+            bool successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
             // TODO: Manage invalid move
         }
 

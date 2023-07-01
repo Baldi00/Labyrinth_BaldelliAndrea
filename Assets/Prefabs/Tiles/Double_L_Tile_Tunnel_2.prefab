@@ -92,10 +92,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1478199202296432054}
-  - component: {fileID: -6746324154427832645}
+  - component: {fileID: -4968479251068929719}
   m_Layer: 0
   m_Name: Double_L_Tile_Tunnel_2
-  m_TagString: Untagged
+  m_TagString: Tunnel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -123,7 +123,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-6746324154427832645
+--- !u!114 &-4968479251068929719
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -132,7 +132,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2664765375972663749}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 497ece1c909553a42a8a0e99cf0178e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 1ec6dfa9051864e4fba7b00c5cc69f0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   availableCrossings:
@@ -284,7 +284,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ef20ad8b60600c54aab0823fbd2ca9dd, type: 2}
+  - {fileID: 2100000, guid: 9512f8730e8402743ab24d57d3f34387, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -622,6 +622,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TileTrigger
       objectReference: {fileID: 0}
+    - target: {fileID: 4185423159298721901, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
+        type: 3}
+      propertyPath: m_TagString
+      value: Tunnel
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875, type: 3}
 --- !u!4 &3109246181465187119 stripped
@@ -630,6 +635,25 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 312588158932816353}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4486453250788071820 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4185423159298721901, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
+    type: 3}
+  m_PrefabInstance: {fileID: 312588158932816353}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8035662103942381325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4486453250788071820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5207c7c4069340943a778b0d79bd252c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tunnel: {fileID: -4968479251068929719}
 --- !u!1001 &7733199949347780182
 PrefabInstance:
   m_ObjectHideFlags: 0

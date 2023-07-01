@@ -1,7 +1,9 @@
 {
     "name": "DBGA.Player",
     "rootNamespace": "DBGA.Player",
-    "references": [],
+    "references": [
+        "GUID:1685e315984f6694bbb59dbdf88e6344"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

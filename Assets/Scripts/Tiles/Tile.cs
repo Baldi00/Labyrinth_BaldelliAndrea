@@ -11,20 +11,12 @@ namespace DBGA.Tiles
         [SerializeField]
         private Cross[] availableCrossings;
 
-        private Vector2Int positionOnGrid;
         private bool hasMonser;
         private bool hasWell;
         private bool hasTeleport;
         private bool playerExplored;
 
-        /// <summary>
-        /// Sets the position of the tile on the grid
-        /// </summary>
-        /// <param name="positionOnGrid">The position on the grid</param>
-        public void SetPositionOnGrid(Vector2Int positionOnGrid)
-        {
-            this.positionOnGrid = positionOnGrid;
-        }
+        public Vector2Int PositionOnGrid { set; get; }
 
         /// <summary>
         /// Returns the list of available bidirectional crossings that can be done on this tile
@@ -81,6 +73,19 @@ namespace DBGA.Tiles
                     return true;
 
             return false;
+        }
+
+        public List<Direction> GetOutDirections(Direction fromDirection)
+        {
+            List<Direction> outDirections = new List<Direction>();
+            foreach(Cross cross in availableCrossings)
+            {
+                if (cross.direction1 == fromDirection)
+                    outDirections.Add(cross.direction2);
+                else if (cross.direction2 == fromDirection)
+                    outDirections.Add(cross.direction1);
+            }
+            return outDirections;
         }
     }
 }
