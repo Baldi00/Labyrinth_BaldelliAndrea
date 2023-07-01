@@ -47,9 +47,6 @@ namespace DBGA.MapGeneration
                     grid[row][col].SetPositionOnGrid(new Vector2Int(row, col));
                 }
             }
-
-            RemoveInvalidCrossings();
-
             return grid;
         }
 
@@ -89,64 +86,6 @@ namespace DBGA.MapGeneration
                     return tile.Value;
 
             return null;
-        }
-
-        private void RemoveInvalidCrossings()
-        {
-            // Remove border crossings
-            for (int row = 0; row < gridSize; row++)
-            {
-                for (int col = 0; col < gridSize; col++)
-                {
-                    if (row == 0)
-                        grid[col][row].RemoveCrossWithDirection(Direction.Down);
-                    if (row == gridSize - 1)
-                        grid[col][row].RemoveCrossWithDirection(Direction.Up);
-                    if (col == 0)
-                        grid[col][row].RemoveCrossWithDirection(Direction.Left);
-                    if (col == gridSize - 1)
-                        grid[col][row].RemoveCrossWithDirection(Direction.Right);
-                }
-            }
-
-            // Remove invalid crossings between tiles
-            for (int row = 1; row < gridSize; row++)
-            {
-                for (int col = 1; col < gridSize; col++)
-                {
-                    if (grid[col - 1][row - 1].CrossingsContainDirection(Direction.Up) &&
-                        !grid[col][row - 1].CrossingsContainDirection(Direction.Down))
-                        grid[col - 1][row - 1].RemoveCrossWithDirection(Direction.Up);
-
-                    if (grid[col][row - 1].CrossingsContainDirection(Direction.Down) &&
-                        !grid[col - 1][row - 1].CrossingsContainDirection(Direction.Up))
-                        grid[col][row - 1].RemoveCrossWithDirection(Direction.Down);
-
-                    if (grid[col - 1][row - 1].CrossingsContainDirection(Direction.Right) &&
-                        !grid[col - 1][row].CrossingsContainDirection(Direction.Left))
-                        grid[col - 1][row - 1].RemoveCrossWithDirection(Direction.Right);
-
-                    if (grid[col - 1][row].CrossingsContainDirection(Direction.Left) &&
-                        !grid[col - 1][row - 1].CrossingsContainDirection(Direction.Right))
-                        grid[col - 1][row].RemoveCrossWithDirection(Direction.Left);
-
-                    if (grid[col - 1][row].CrossingsContainDirection(Direction.Up) &&
-                        !grid[col][row].CrossingsContainDirection(Direction.Down))
-                        grid[col - 1][row].RemoveCrossWithDirection(Direction.Up);
-
-                    if (grid[col][row].CrossingsContainDirection(Direction.Down) &&
-                        !grid[col - 1][row].CrossingsContainDirection(Direction.Up))
-                        grid[col][row].RemoveCrossWithDirection(Direction.Down);
-
-                    if (grid[col][row - 1].CrossingsContainDirection(Direction.Right) &&
-                        !grid[col][row].CrossingsContainDirection(Direction.Left))
-                        grid[col][row - 1].RemoveCrossWithDirection(Direction.Right);
-
-                    if (grid[col][row].CrossingsContainDirection(Direction.Left) &&
-                        !grid[col][row - 1].CrossingsContainDirection(Direction.Right))
-                        grid[col][row].RemoveCrossWithDirection(Direction.Left);
-                }
-            }
         }
     }
 }
