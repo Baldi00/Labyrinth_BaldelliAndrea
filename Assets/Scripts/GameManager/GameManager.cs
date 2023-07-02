@@ -3,6 +3,7 @@ using DBGA.EventSystem;
 using DBGA.MapGeneration;
 using DBGA.Player;
 using DBGA.Tiles;
+using DBGA.Camera;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,6 +27,10 @@ namespace DBGA.GameManager
         [SerializeField]
         private Player.Player playerPrefab;
 
+        [Header("Camera")]
+        [SerializeField]
+        private CameraFollowPlayer camera;
+
         private Tile[][] grid;
         private Player.Player currentPlayer;
 
@@ -37,6 +42,7 @@ namespace DBGA.GameManager
                 grid = mapGenerator.GenerateMap(gridSize, tilesList);
 
             SpawnPlayer();
+            camera.SetPlayerTransform(currentPlayer.transform);
         }
 
         void OnDestroy()
