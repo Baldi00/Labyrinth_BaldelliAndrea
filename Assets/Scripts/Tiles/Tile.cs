@@ -11,10 +11,10 @@ namespace DBGA.Tiles
         [SerializeField]
         private Cross[] availableCrossings;
 
-        private bool hasMonser;
-        private bool hasWell;
-        private bool hasTeleport;
-        private bool playerExplored;
+        public bool HasMonser { set; get; }
+        public bool HasWell { set; get; }
+        public bool HasTeleport { set; get; }
+        public bool PlayerExplored { set; get; }
 
         public Vector2Int PositionOnGrid { set; get; }
 

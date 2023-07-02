@@ -36,7 +36,7 @@ namespace DBGA.GameManager
             if (generateRandomMap)
                 grid = mapGenerator.GenerateMap(gridSize, tilesList);
 
-            SpawnPlayer(gridSize / 2, gridSize / 2);
+            SpawnPlayer();
         }
 
         void OnDestroy()
@@ -66,13 +66,38 @@ namespace DBGA.GameManager
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InputArrowShotEvent));
         }
 
-        private void SpawnPlayer(int positionX, int positionY)
+        /// <summary>
+        /// Spawns player on a random valid tile
+        /// </summary>
+        private void SpawnPlayer()
         {
-            GameObject playerGameObject =
-                Instantiate(playerPrefab.gameObject, new Vector3(positionX, 0, positionY), Quaternion.identity);
+            Vector2Int randomPosition;
+            do
+            {
+                randomPosition = RandomizePosition();
+            } while (!IsPlayerSpawnedOnValidTile(randomPosition));
+
+            GameObject playerGameObject = Instantiate(
+                playerPrefab.gameObject,
+                new Vector3(randomPosition.x, 0, randomPosition.y),
+                Quaternion.identity);
+
             currentPlayer = playerGameObject.GetComponent<Player.Player>();
 
-            currentPlayer.SetPositionOnGrid(new Vector2Int(positionX, positionY));
+            currentPlayer.SetPositionOnGrid(randomPosition);
+        }
+
+        private Vector2Int RandomizePosition()
+        {
+            return new Vector2Int(UnityEngine.Random.Range(0, gridSize), UnityEngine.Random.Range(0, gridSize));
+        }
+
+        private bool IsPlayerSpawnedOnValidTile(Vector2Int position)
+        {
+            Tile tile = grid[position.x][position.y];
+            if (tile is Tunnel || tile.HasMonser || tile.HasTeleport || tile.HasWell)
+                return false;
+            return true;
         }
 
         private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
