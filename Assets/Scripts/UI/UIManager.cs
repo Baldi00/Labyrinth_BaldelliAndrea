@@ -33,6 +33,10 @@ namespace DBGA.UI
         [SerializeField]
         private Text arrowCount;
 
+        [Header("Invalid move")]
+        [SerializeField]
+        private InvalidMoveUIManager invalidMove;
+
         void Start()
         {
             AddGameEventsListeners();
@@ -72,6 +76,9 @@ namespace DBGA.UI
                 case InitializeArrowCountEvent initializeArrowCountEvent:
                     arrowCount.text = $"Arrows: {initializeArrowCountEvent.remainingArrows}";
                     break;
+                case InvalidMoveEvent:
+                    invalidMove.Show();
+                    break;
             }
         }
 
@@ -86,6 +93,7 @@ namespace DBGA.UI
             GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowShotEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InitializeArrowCountEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(InvalidMoveEvent));
         }
     }
 }

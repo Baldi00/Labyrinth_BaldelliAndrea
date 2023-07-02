@@ -26,6 +26,9 @@ namespace DBGA.Player
 
         private GameEventsManager gameEventsManager;
 
+        private Coroutine animateMovementToNextTileCoroutine;
+        private Coroutine animateMovementToNextTilesCoroutine;
+
         public Vector2Int PositionOnGrid { get => positionOnGrid; }
         public bool IgnoreInputs { set; get; }
         public int CurrentArrowsCount { get => currentArrowsCount; }
@@ -51,9 +54,17 @@ namespace DBGA.Player
             gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = positionOnGrid });
         }
 
+        /// <summary>
+        /// Teleports the player to the given position
+        /// </summary>
+        /// <param name="nextPosition">The position the player must be set on</param>
         public void TeleportToNextPosition(Vector2Int nextPosition)
         {
-            StopAllCoroutines();
+            if (animateMovementToNextTileCoroutine != null)
+                StopCoroutine(animateMovementToNextTileCoroutine);
+            if (animateMovementToNextTilesCoroutine != null)
+                StopCoroutine(animateMovementToNextTilesCoroutine);
+
             isInMoveAnimation = false;
             MoveToNextTile(nextPosition, 0);
         }
@@ -79,11 +90,22 @@ namespace DBGA.Player
                 return false;
 
             if (raycastHits.Any<RaycastHit>(hit => hit.collider.CompareTag("Tunnel")))
-                return TunnelDetectedManagement(ref nextPosition, moveDirection, raycastHits);
+            {
+                ITunnel tunnel = raycastHits
+                    .Where<RaycastHit>(hit => hit.collider.CompareTag("Tunnel"))
+                    .ElementAt<RaycastHit>(0)
+                    .collider.GetComponent<ITunnelTrigger>().GetTunnel();
+                return HandleTunnelMovement(moveDirection, tunnel);
+            }
             else
                 return MoveToNextTile(nextPosition, movementAnimationDuration);
         }
 
+        /// <summary>
+        /// Shots an arrow in the given direction if player has some remaining arrows
+        /// </summary>
+        /// <param name="shotDirection">The direction the arrow should be shot</param>
+        /// <returns>True if the arrow has been shot, false otherwise</returns>
         public bool ShotArrow(Direction shotDirection)
         {
             if (IgnoreInputs)
@@ -93,7 +115,7 @@ namespace DBGA.Player
                 return false;
 
             currentArrowsCount--;
-            
+
             Quaternion arrowRotation = GetArrowRotationFromDirection(shotDirection);
             Instantiate(arrowPrefab, transform.position, arrowRotation);
             gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
@@ -101,16 +123,18 @@ namespace DBGA.Player
             return true;
         }
 
-        private bool TunnelDetectedManagement(ref Vector2Int nextPosition, Direction moveDirection, RaycastHit[] raycastHits)
+        /// <summary>
+        /// Handles the movement of the player inside a tunnel.
+        /// If the movement is allows, moves the player until the end of the tunnel
+        /// </summary>
+        /// <param name="moveDirection">The direction in which the player wants to move</param>
+        /// <param name="tunnel">The first tunnel tile encountered</param>
+        /// <returns>True if movement had success, false otherwise</returns>
+        private bool HandleTunnelMovement(Direction moveDirection, ITunnel tunnel)
         {
-            ITunnel tunnel = raycastHits
-                .Where<RaycastHit>(hit => hit.collider.CompareTag("Tunnel"))
-                .ElementAt<RaycastHit>(0)
-                .collider.GetComponent<ITunnelTrigger>().GetTunnel();
-
             if (tunnel.CanCross(moveDirection.GetOppositeDirection()))
             {
-                nextPosition = tunnel.GetFinalDestination(moveDirection.GetOppositeDirection());
+                Vector2Int nextPosition = tunnel.GetFinalDestination(moveDirection.GetOppositeDirection());
                 tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
                 return MoveToNextTiles(
                     nextPosition,
@@ -121,26 +145,46 @@ namespace DBGA.Player
                 return false;
         }
 
+        /// <summary>
+        /// Moves the player to the given position with an animation
+        /// </summary>
+        /// <param name="nextPosition">The position in which the player should be placed in</param>
+        /// <param name="animationDuration">The duration of the animation</param>
+        /// <returns>True if movement succeeded, false otherwise</returns>
         private bool MoveToNextTile(Vector2Int nextPosition, float animationDuration)
         {
             if (isInMoveAnimation)
                 return false;
 
             SetPositionOnGrid(nextPosition);
-            StartCoroutine(AnimateMovementToNextTile(nextPosition, animationDuration));
+            animateMovementToNextTileCoroutine =
+                StartCoroutine(AnimateMovementToNextTile(nextPosition, animationDuration));
             return true;
         }
 
+        /// <summary>
+        /// Moves the player through the given list of position with an animation
+        /// </summary>
+        /// <param name="finalPosition">The final position in which the player should be placed in</param>
+        /// <param name="crossingPositions">The list of position the player should pass in</param>
+        /// <param name="animationDuration">The duration of the animation</param>
+        /// <returns>True if movement succeeded, false otherwise</returns>
         private bool MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions, float animationDuration)
         {
             if (isInMoveAnimation)
                 return false;
 
             SetPositionOnGrid(finalPosition);
-            StartCoroutine(AnimateMovementToNextTiles(crossingPositions, animationDuration));
+            animateMovementToNextTilesCoroutine =
+                StartCoroutine(AnimateMovementToNextTiles(crossingPositions, animationDuration));
             return true;
         }
 
+        /// <summary>
+        /// Animates the movement from the start to the end position of the player
+        /// </summary>
+        /// <param name="nextPosition">The position in which the player should be placed in</param>
+        /// <param name="animationDuration">The duration of the animation</param>
         private IEnumerator AnimateMovementToNextTile(Vector2Int nextPosition, float animationDuration)
         {
             isInMoveAnimation = true;
@@ -161,6 +205,11 @@ namespace DBGA.Player
             isInMoveAnimation = false;
         }
 
+        /// <summary>
+        /// Animates the movement from the start to the end position of the player passing through the crossing positions
+        /// </summary>
+        /// <param name="crossingPositions">The list of position the player should pass in</param>
+        /// <param name="animationDuration">The duration of the animation</param>
         private IEnumerator AnimateMovementToNextTiles(List<Vector2Int> crossingPositions, float animationDuration)
         {
             isInMoveAnimation = true;
@@ -185,6 +234,11 @@ namespace DBGA.Player
             isInMoveAnimation = false;
         }
 
+        /// <summary>
+        /// Returns the rotation that the arrow should have if shot in the given direction
+        /// </summary>
+        /// <param name="shotDirection">The direction in which the arrow should be shot</param>
+        /// <returns>The rotation that the arrow should have if shot in the given direction</returns>
         private Quaternion GetArrowRotationFromDirection(Direction shotDirection)
         {
             return shotDirection switch

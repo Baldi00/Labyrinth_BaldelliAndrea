@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace DBGA.Camera
 {
+    /// <summary>
+    /// Component that follows the player with a smoothing
+    /// </summary>
     [DisallowMultipleComponent]
     public class CameraFollowPlayer : MonoBehaviour
     {

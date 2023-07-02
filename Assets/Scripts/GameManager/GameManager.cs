@@ -1,11 +1,8 @@
 using DBGA.Common;
 using DBGA.EventSystem;
 using DBGA.MapGeneration;
-using DBGA.Player;
 using DBGA.Tiles;
 using DBGA.Camera;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.GameManager
@@ -44,6 +41,13 @@ namespace DBGA.GameManager
         private GameObject monster;
         private Tile monsterTile;
 
+        private GameEventsManager gameEventsManager;
+
+        void Awake()
+        {
+            gameEventsManager = GameEventsManager.Instance;
+        }
+
         void Start()
         {
             AddGameEventListeners();
@@ -53,14 +57,13 @@ namespace DBGA.GameManager
 
             PlaceFog();
             PlaceMapElements();
-
             PlacePlayer();
             mainCamera.SetPlayerTransform(currentPlayer.transform);
         }
 
         void OnDestroy()
         {
-            GameEventsManager.Instance.RemoveAllGameEventListeners();
+            gameEventsManager.RemoveAllGameEventListeners();
         }
 
         public void ReceiveGameEvent(GameEvent gameEvent)
@@ -74,7 +77,7 @@ namespace DBGA.GameManager
                     HandleInputArrowShotEvent(inputArrowShotEvent);
                     break;
                 case EnteredTeleportTileEvent:
-                    TeleportPlayerInRandomPosition();
+                    TeleportPlayerOntoRandomEmptyTile();
                     break;
                 case EnteredWellTileEvent:
                 case EnteredMonsterTileEvent:
@@ -96,20 +99,21 @@ namespace DBGA.GameManager
         /// </summary>
         private void AddGameEventListeners()
         {
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(InputMoveEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(InputArrowShotEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(InputMoveEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(InputArrowShotEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(EnteredWellTileEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
         }
 
         /// <summary>
         /// Places player on a random empty tile
         /// </summary>
+        /// <see cref="IsEmptyTile"/>
         private void PlacePlayer()
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
@@ -119,8 +123,9 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Places monsters, teleports and wells on the grid
+        /// Places monsters, teleports and wells on the grid in empty tiles
         /// </summary>
+        /// <see cref="IsEmptyTile"/>
         private void PlaceMapElements()
         {
             foreach (MapElementsItem mapElementsItem in mapElementsList.mapElements)
@@ -147,6 +152,9 @@ namespace DBGA.GameManager
                 }
         }
 
+        /// <summary>
+        /// Places fog on the grid
+        /// </summary>
         private void PlaceFog()
         {
             fogGrid = new GameObject[gridSize][];
@@ -159,6 +167,11 @@ namespace DBGA.GameManager
             }
         }
 
+        /// <summary>
+        /// Returns a random position of an empty tile on the grid
+        /// </summary>
+        /// <see cref="IsEmptyTile"/>
+        /// <returns>A random position of an empty tile on the grid</returns>
         private Vector2Int GetRandomPositionOnEmptyTile()
         {
             Vector2Int randomPosition;
@@ -178,39 +191,26 @@ namespace DBGA.GameManager
 
         /// <summary>
         /// Checks if the tile is empty and can be used to place things.
-        /// Empty means that it is not a Tunnel tile, it has no monsters, teleports or wells
+        /// Empty means that it is not a Tunnel tile, it has no monsters, teleports, wells or player on it
         /// </summary>
         /// <param name="position">The position on the grid of the tile to test</param>
         /// <returns>True if the tile is empty, false otherwise</returns>
         private bool IsEmptyTile(Vector2Int position)
         {
+            if (currentPlayer != null && position.Equals(currentPlayer.PositionOnGrid))
+                return false;
+
             Tile tile = grid[position.x][position.y];
             if (tile is Tunnel || tile.HasMonster || tile.HasTeleport || tile.HasWell)
                 return false;
             return true;
         }
 
-        private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
-        {
-            Vector2Int nextPosition = GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
-
-            if (IsPositionInsideGrid(nextPosition))
-            {
-                bool successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
-            }
-            else
-            {
-                // TODO: Manage invalid move
-            }
-
-            // TODO: Manage invalid move
-        }
-
-        private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
-        {
-            currentPlayer.ShotArrow(inputArrowShotEvent.direction);
-        }
-
+        /// <summary>
+        /// Returns the tile in the given position on the grid, null if position is out of the grid
+        /// </summary>
+        /// <param name="position">The position of the tile you want to get</param>
+        /// <returns>The tile in the given position on the grid, null if position is out of the grid</returns>
         private Tile GetTileAtPosition(Vector2Int position)
         {
             if (IsPositionInsideGrid(position))
@@ -218,6 +218,11 @@ namespace DBGA.GameManager
             return null;
         }
 
+        /// <summary>
+        /// Returns the fog game object in the given position on the grid, null if position is out of the grid
+        /// </summary>
+        /// <param name="position">The position of the fog game object you want to get</param>
+        /// <returns>The fog game object in the given position on the grid, null if position is out of the grid</returns>
         private GameObject GetFogAtPosition(Vector2Int position)
         {
             if (IsPositionInsideGrid(position))
@@ -225,6 +230,12 @@ namespace DBGA.GameManager
             return null;
         }
 
+        /// <summary>
+        /// Returns the next position on the grid from the current position on the grid in the given direction
+        /// </summary>
+        /// <param name="currentPosition">The current position on the grid</param>
+        /// <param name="direction">The direction in which you search the next position</param>
+        /// <returns>The next position on the grid from the current position on the grid in the given direction</returns>
         private Vector2Int GetNextPosition(Vector2Int currentPosition, Direction direction)
         {
             return direction switch
@@ -237,18 +248,30 @@ namespace DBGA.GameManager
             };
         }
 
+        /// <summary>
+        /// Checks if the given position is on the grid or not
+        /// </summary>
+        /// <param name="position">The position to test</param>
+        /// <returns>True if the given position is on the grid, false if is outside</returns>
         private bool IsPositionInsideGrid(Vector2Int position)
         {
             return position.x >= 0 && position.y >= 0 &&
                 position.x < gridSize && position.y < gridSize;
         }
 
-        private void TeleportPlayerInRandomPosition()
+        /// <summary>
+        /// Teleport the player onto another empty tile
+        /// </summary>
+        private void TeleportPlayerOntoRandomEmptyTile()
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             currentPlayer.TeleportToNextPosition(randomPosition);
         }
-        private void TeleportMonsterInRandomPosition()
+
+        /// <summary>
+        /// Teleport the monster onto another empty tile
+        /// </summary>
+        private void TeleportMonsterOntoRandomEmptyTile()
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             monsterTile.HasMonster = false;
@@ -257,17 +280,50 @@ namespace DBGA.GameManager
             monsterTile.HasMonster = true;
         }
 
+        /// <summary>
+        /// If the movement is allowed moves the player to next tile, otherwise triggers an invalid move event
+        /// </summary>
+        /// <param name="inputMoveEvent">The event that triggered the movement containing the direction of the movement</param>
+        private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
+        {
+            Vector2Int nextPosition = GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
+
+            bool successfulMove = false;
+            if (IsPositionInsideGrid(nextPosition))
+                successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
+
+            if (!successfulMove)
+                gameEventsManager.DispatchGameEvent(new InvalidMoveEvent());
+        }
+
+        /// <summary>
+        /// Asks player to shot an arrow
+        /// </summary>
+        /// <param name="inputArrowShotEvent"></param>
+        private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
+        {
+            currentPlayer.ShotArrow(inputArrowShotEvent.direction);
+        }
+
+        /// <summary>
+        /// Sets the tile as explored by the player and disable fog on that tile
+        /// </summary>
+        /// <param name="playerExploredTileEvent"></param>
         private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
         {
             GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
             GetFogAtPosition(playerExploredTileEvent.positionOnGrid).SetActive(false);
         }
 
+        /// <summary>
+        /// Teleports the monster onto anoter tile,
+        /// if the player has no remaining arrows tells the game that the player lost
+        /// </summary>
         private void HandleArrowCollidedWithWallEvent()
         {
-            TeleportMonsterInRandomPosition();
+            TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
-                GameEventsManager.Instance.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent());
+                gameEventsManager.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent());
         }
     }
 }
