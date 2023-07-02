@@ -104,7 +104,7 @@ namespace DBGA.GameManager
                     switch (mapElementsItem.mapElement)
                     {
                         case MapElement.MONSTER:
-                            placementTile.HasMonser = true;
+                            placementTile.HasMonster = true;
                             break;
                         case MapElement.TELEPORT:
                             placementTile.HasTeleport = true;
@@ -142,7 +142,7 @@ namespace DBGA.GameManager
         private bool IsEmptyTile(Vector2Int position)
         {
             Tile tile = grid[position.x][position.y];
-            if (tile is Tunnel || tile.HasMonser || tile.HasTeleport || tile.HasWell)
+            if (tile is Tunnel || tile.HasMonster || tile.HasTeleport || tile.HasWell)
                 return false;
             return true;
         }

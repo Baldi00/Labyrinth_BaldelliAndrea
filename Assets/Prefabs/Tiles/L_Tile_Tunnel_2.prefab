@@ -316,6 +316,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ec6dfa9051864e4fba7b00c5cc69f0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thisTileTrigger: {fileID: 3786050089399487412}
+  adjacentTriggers: {fileID: 6923621364466278702}
   availableCrossings:
   - direction1: 0
     direction2: 2
@@ -836,6 +838,12 @@ PrefabInstance:
 --- !u!4 &6907496865052962032 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2005870490930743803, guid: b14e976c443dae04b97f0bbfa9e68358,
+    type: 3}
+  m_PrefabInstance: {fileID: 4902752414597555467}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6923621364466278702 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2603001054334796837, guid: b14e976c443dae04b97f0bbfa9e68358,
     type: 3}
   m_PrefabInstance: {fileID: 4902752414597555467}
   m_PrefabAsset: {fileID: 0}

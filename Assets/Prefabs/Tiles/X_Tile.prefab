@@ -300,19 +300,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 497ece1c909553a42a8a0e99cf0178e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableCrossings:
-  - direction1: 0
-    direction2: 2
-  - direction1: 0
-    direction2: 3
-  - direction1: 0
-    direction2: 1
-  - direction1: 2
-    direction2: 3
-  - direction1: 2
-    direction2: 1
-  - direction1: 1
-    direction2: 3
+  thisTileTrigger: {fileID: 7068658505859735782}
+  adjacentTriggers: {fileID: 5460324398762638496}
 --- !u!1 &3763954644908634978
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,6 +537,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875, type: 3}
+--- !u!1 &7068658505859735782 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4185423159298721901, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
+    type: 3}
+  m_PrefabInstance: {fileID: 6344858590769162379}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8610245793522539077 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3418456054811849422, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
@@ -623,6 +618,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b14e976c443dae04b97f0bbfa9e68358, type: 3}
+--- !u!1 &5460324398762638496 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2603001054334796837, guid: b14e976c443dae04b97f0bbfa9e68358,
+    type: 3}
+  m_PrefabInstance: {fileID: 8059560654399535237}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8362910883284742526 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2005870490930743803, guid: b14e976c443dae04b97f0bbfa9e68358,

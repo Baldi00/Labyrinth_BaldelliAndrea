@@ -132,9 +132,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 497ece1c909553a42a8a0e99cf0178e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableCrossings:
-  - direction1: 2
-    direction2: 3
+  thisTileTrigger: {fileID: 6780944482485983302}
+  adjacentTriggers: {fileID: 7770505522639905588}
 --- !u!1 &7997045735282563302
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,6 +403,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 5749361903977522961}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7770505522639905588 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2603001054334796837, guid: b14e976c443dae04b97f0bbfa9e68358,
+    type: 3}
+  m_PrefabInstance: {fileID: 5749361903977522961}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7210083939061944363
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -476,6 +481,12 @@ PrefabInstance:
 --- !u!4 &5440232419567248101 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3418456054811849422, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
+    type: 3}
+  m_PrefabInstance: {fileID: 7210083939061944363}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6780944482485983302 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4185423159298721901, guid: 7b3d80a6a7e7d9c4d9f0b04e2724e875,
     type: 3}
   m_PrefabInstance: {fileID: 7210083939061944363}
   m_PrefabAsset: {fileID: 0}
