@@ -2,6 +2,8 @@ using System.Linq;
 using UnityEngine;
 using DBGA.Common;
 using System.Runtime.CompilerServices;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace DBGA.Player
 {
@@ -10,10 +12,15 @@ namespace DBGA.Player
     {
         [SerializeField]
         private int initialArrowsCount = 5;
+        [SerializeField]
+        private float movementAnimationDuration = 1f;
+        [SerializeField]
+        private AnimationCurve moveAnimationSmoothing;
 
         private int currentArrowsCount;
 
         private Vector2Int positionOnGrid;
+        private bool isInMoveAnimation;
 
         public Vector2Int PositionOnGrid { get => positionOnGrid; }
 
@@ -65,9 +72,7 @@ namespace DBGA.Player
             {
                 nextPosition = tunnel.GetFinalDestination(moveDirection.GetOppositeDirection());
                 tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
-                SetPositionOnGrid(nextPosition);
-                transform.position = new Vector3(nextPosition.x, 0f, nextPosition.y);
-                return true;
+                return MoveToNextTiles(nextPosition, tunnel.GetAllCrossingPoints(moveDirection.GetOppositeDirection()));
             }
             else
                 return false;
@@ -75,9 +80,64 @@ namespace DBGA.Player
 
         private bool MoveToNextTile(Vector2Int nextPosition)
         {
+            if (isInMoveAnimation)
+                return false;
+
             SetPositionOnGrid(nextPosition);
-            transform.position = new Vector3(nextPosition.x, 0f, nextPosition.y);
+            StartCoroutine(AnimateMovementToNextTile(nextPosition));
             return true;
+        }
+
+        private bool MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions)
+        {
+            if (isInMoveAnimation)
+                return false;
+
+            SetPositionOnGrid(finalPosition);
+            StartCoroutine(AnimateMovementToNextTiles(crossingPositions));
+            return true;
+        }
+
+        private IEnumerator AnimateMovementToNextTile(Vector2Int nextPosition)
+        {
+            isInMoveAnimation = true;
+            float animationTimer = 0;
+            Vector3 startPosition3d = transform.position;
+            Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
+            while (animationTimer < movementAnimationDuration)
+            {
+                transform.position = Vector3.Lerp(
+                    startPosition3d,
+                    nextPosition3d,
+                    moveAnimationSmoothing.Evaluate(animationTimer / movementAnimationDuration));
+
+                animationTimer += Time.deltaTime;
+                yield return null;
+            }
+            isInMoveAnimation = false;
+        }
+
+        private IEnumerator AnimateMovementToNextTiles(List<Vector2Int> crossingPositions)
+        {
+            isInMoveAnimation = true;
+            foreach (Vector2Int nextPosition in crossingPositions)
+            {
+                float animationTimer = 0;
+                Vector3 startPosition3d = transform.position;
+                Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
+                while (animationTimer < movementAnimationDuration)
+                {
+                    transform.position = Vector3.Lerp(
+                        startPosition3d,
+                        nextPosition3d,
+                        moveAnimationSmoothing.Evaluate(animationTimer / movementAnimationDuration));
+
+                    animationTimer += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
+            isInMoveAnimation = false;
         }
     }
 }
