@@ -1,5 +1,6 @@
 using DBGA.EventSystem;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DBGA.UI
 {
@@ -11,6 +12,14 @@ namespace DBGA.UI
         private GameObject youWinUi;
         [SerializeField]
         private GameObject youLoseUi;
+        [SerializeField]
+        private Text youLoseDescription;
+        [SerializeField]
+        private string youLoseMonsterDescription;
+        [SerializeField]
+        private string youLoseWellDescription;
+        [SerializeField]
+        private string youLoseNoArrowDescription;
 
         [Header("Special UI")]
         [SerializeField]
@@ -19,6 +28,10 @@ namespace DBGA.UI
         private GameObject windUi;
         [SerializeField]
         private GameObject moldUi;
+
+        [Header("Arrows count")]
+        [SerializeField]
+        private Text arrowCount;
 
         void Start()
         {
@@ -39,8 +52,25 @@ namespace DBGA.UI
                     windUi.SetActive(teleportTileAdjacentEvent.isPlayerInside);
                     break;
                 case EnteredWellTileEvent:
-                case EnteredMonsterTileEvent:
+                    youLoseDescription.text = youLoseWellDescription;
                     youLoseUi.SetActive(true);
+                    break;
+                case EnteredMonsterTileEvent:
+                    youLoseDescription.text = youLoseMonsterDescription;
+                    youLoseUi.SetActive(true);
+                    break;
+                case PlayerLostForNoArrowRemainingEvent:
+                    youLoseDescription.text = youLoseNoArrowDescription;
+                    youLoseUi.SetActive(true);
+                    break;
+                case ArrowCollidedWithMonsterEvent:
+                    youWinUi.SetActive(true);
+                    break;
+                case ArrowShotEvent arrowShotEvent:
+                    arrowCount.text = $"Arrows: {arrowShotEvent.remainingArrows}";
+                    break;
+                case InitializeArrowCountEvent initializeArrowCountEvent:
+                    arrowCount.text = $"Arrows: {initializeArrowCountEvent.remainingArrows}";
                     break;
             }
         }
@@ -52,6 +82,10 @@ namespace DBGA.UI
             GameEventsManager.Instance.AddGameEventListener(this, typeof(TeleportTileAdjacentEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowShotEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(InitializeArrowCountEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
         }
     }
 }

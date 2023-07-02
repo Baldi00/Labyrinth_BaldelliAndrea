@@ -41,6 +41,9 @@ namespace DBGA.GameManager
         private GameObject[][] fogGrid;
         private Player.Player currentPlayer;
 
+        private GameObject monster;
+        private Tile monsterTile;
+
         void Start()
         {
             AddGameEventListeners();
@@ -75,10 +78,15 @@ namespace DBGA.GameManager
                     break;
                 case EnteredWellTileEvent:
                 case EnteredMonsterTileEvent:
+                case ArrowCollidedWithMonsterEvent:
+                case PlayerLostForNoArrowRemainingEvent:
                     currentPlayer.IgnoreInputs = true;
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
                     HandlePlayerExploredTileEvent(playerExploredTileEvent);
+                    break;
+                case ArrowCollidedWithWallEvent:
+                    HandleArrowCollidedWithWallEvent();
                     break;
             }
         }
@@ -94,6 +102,9 @@ namespace DBGA.GameManager
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
         }
 
         /// <summary>
@@ -116,13 +127,15 @@ namespace DBGA.GameManager
                 for (int i = 0; i < mapElementsItem.count; i++)
                 {
                     Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
-                    InstantiateOnTile(mapElementsItem.prefab, randomPosition, transform);
+                    GameObject mapElement = InstantiateOnTile(mapElementsItem.prefab, randomPosition, transform);
                     Tile placementTile = GetTileAtPosition(randomPosition);
 
                     switch (mapElementsItem.mapElement)
                     {
                         case MapElement.MONSTER:
                             placementTile.HasMonster = true;
+                            monsterTile = placementTile;
+                            monster = mapElement;
                             break;
                         case MapElement.TELEPORT:
                             placementTile.HasTeleport = true;
@@ -235,6 +248,14 @@ namespace DBGA.GameManager
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             currentPlayer.TeleportToNextPosition(randomPosition);
         }
+        private void TeleportMonsterInRandomPosition()
+        {
+            Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
+            monsterTile.HasMonster = false;
+            monster.transform.position = new Vector3(randomPosition.x, 0f, randomPosition.y);
+            monsterTile = GetTileAtPosition(randomPosition);
+            monsterTile.HasMonster = true;
+        }
 
         private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
         {
@@ -242,5 +263,11 @@ namespace DBGA.GameManager
             GetFogAtPosition(playerExploredTileEvent.positionOnGrid).SetActive(false);
         }
 
+        private void HandleArrowCollidedWithWallEvent()
+        {
+            TeleportMonsterInRandomPosition();
+            if (currentPlayer.CurrentArrowsCount <= 0)
+                GameEventsManager.Instance.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent());
+        }
     }
 }

@@ -28,11 +28,17 @@ namespace DBGA.Player
 
         public Vector2Int PositionOnGrid { get => positionOnGrid; }
         public bool IgnoreInputs { set; get; }
+        public int CurrentArrowsCount { get => currentArrowsCount; }
 
         void Awake()
         {
             currentArrowsCount = initialArrowsCount;
             gameEventsManager = GameEventsManager.Instance;
+        }
+
+        void Start()
+        {
+            gameEventsManager.DispatchGameEvent(new InitializeArrowCountEvent() { remainingArrows = currentArrowsCount });
         }
 
         /// <summary>
@@ -80,13 +86,17 @@ namespace DBGA.Player
 
         public bool ShotArrow(Direction shotDirection)
         {
+            if (IgnoreInputs)
+                return false;
+
             if (currentArrowsCount <= 0)
                 return false;
 
             currentArrowsCount--;
             
             Quaternion arrowRotation = GetArrowRotationFromDirection(shotDirection);
-            GameObject a = Instantiate(arrowPrefab, transform.position, arrowRotation);
+            Instantiate(arrowPrefab, transform.position, arrowRotation);
+            gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
 
             return true;
         }

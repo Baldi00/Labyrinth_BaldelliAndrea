@@ -18,11 +18,11 @@ namespace DBGA.Player
             switch (other.gameObject.tag)
             {
                 case "Wall":
-                    // TODO: Arrow collided with wall
+                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithWallEvent());
                     Destroy(gameObject);
                     break;
                 case "Monster":
-                    // TODO: Arrow collided with monster
+                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent());
                     Destroy(gameObject);
                     break;
                 case "Tunnel":
