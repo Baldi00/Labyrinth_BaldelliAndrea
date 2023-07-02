@@ -11,7 +11,7 @@ namespace DBGA.Camera
 
         private Transform playerTransform;
 
-        void LateUpdate()
+        void FixedUpdate()
         {
             transform.position = 
                 Vector3.Lerp(
