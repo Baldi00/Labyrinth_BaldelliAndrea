@@ -6,6 +6,12 @@ TagManager:
   tags:
   - Wall
   - Tunnel
+  - AdjacentMonster
+  - Monster
+  - AdjacentTeleport
+  - Teleport
+  - AdjacentWell
+  - Well
   layers:
   - Default
   - TransparentFX

@@ -84,7 +84,7 @@ namespace DBGA.GameManager
         private void PlacePlayer()
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
-            GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition);
+            GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition, null);
             currentPlayer = playerGameObject.GetComponent<Player.Player>();
             currentPlayer.SetPositionOnGrid(randomPosition);
         }
@@ -98,7 +98,7 @@ namespace DBGA.GameManager
                 for (int i = 0; i < mapElementsItem.count; i++)
                 {
                     Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
-                    InstantiateOnTile(mapElementsItem.prefab, randomPosition);
+                    InstantiateOnTile(mapElementsItem.prefab, randomPosition, transform);
                     Tile placementTile = GetTileAtPosition(randomPosition);
 
                     switch (mapElementsItem.mapElement)
@@ -128,9 +128,9 @@ namespace DBGA.GameManager
             return randomPosition;
         }
 
-        private GameObject InstantiateOnTile(GameObject gameObject, Vector2Int position)
+        private GameObject InstantiateOnTile(GameObject gameObject, Vector2Int position, Transform parent)
         {
-            return Instantiate(gameObject, new Vector3(position.x, 0, position.y), Quaternion.identity);
+            return Instantiate(gameObject, new Vector3(position.x, 0, position.y), Quaternion.identity, parent);
         }
 
         /// <summary>
