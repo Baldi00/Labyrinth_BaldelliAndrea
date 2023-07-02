@@ -1,5 +1,6 @@
 using UnityEngine;
 using DBGA.Common;
+using DBGA.EventSystem;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -21,9 +22,12 @@ namespace DBGA.Tiles
 
         private List<AdjacentTile> adjacentTiles;
 
+        private GameEventsManager gameEventsManager;
+
         void Awake()
         {
             adjacentTiles = new List<AdjacentTile>();
+            gameEventsManager = GameEventsManager.Instance;
         }
 
         public void AddAdjacentTile(Direction direction, Tile tile)
@@ -170,7 +174,7 @@ namespace DBGA.Tiles
             if (nextTile.direction == Direction.None)
                 return;
 
-            // TODO: Reveal this tile
+            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = PositionOnGrid });
 
             // Next tile is a tunnel, reveal next tile
             if (nextTile.tile is Tunnel nextTunnelTile)

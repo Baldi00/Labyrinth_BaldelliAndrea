@@ -377,6 +377,8 @@ MonoBehaviour:
     type: 3}
   mainCamera: {fileID: 330585548}
   mapElementsList: {fileID: 11400000, guid: 6be0b683e67814847bcafd9bd5544800, type: 2}
+  fogElementPrefab: {fileID: 7774140918785996905, guid: ce4126dbc079ff540bd5d795b09bf5c0,
+    type: 3}
 --- !u!114 &1721960303
 MonoBehaviour:
   m_ObjectHideFlags: 0

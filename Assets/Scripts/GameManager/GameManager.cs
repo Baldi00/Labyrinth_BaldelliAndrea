@@ -34,8 +34,11 @@ namespace DBGA.GameManager
         [Header("Map elements")]
         [SerializeField]
         private MapElementsList mapElementsList;
+        [SerializeField]
+        private GameObject fogElementPrefab;
 
         private Tile[][] grid;
+        private GameObject[][] fogGrid;
         private Player.Player currentPlayer;
 
         void Start()
@@ -45,10 +48,11 @@ namespace DBGA.GameManager
             if (generateRandomMap)
                 grid = mapGenerator.GenerateMap(gridSize, tilesList);
 
+            PlaceFog();
+            PlaceMapElements();
+
             PlacePlayer();
             mainCamera.SetPlayerTransform(currentPlayer.transform);
-
-            PlaceMapElements();
         }
 
         void OnDestroy()
@@ -73,6 +77,9 @@ namespace DBGA.GameManager
                 case EnteredMonsterTileEvent:
                     currentPlayer.IgnoreInputs = true;
                     break;
+                case PlayerExploredTileEvent playerExploredTileEvent:
+                    HandlePlayerExploredTileEvent(playerExploredTileEvent);
+                    break;
             }
         }
 
@@ -86,6 +93,7 @@ namespace DBGA.GameManager
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
         }
 
         /// <summary>
@@ -124,6 +132,18 @@ namespace DBGA.GameManager
                             break;
                     }
                 }
+        }
+
+        private void PlaceFog()
+        {
+            fogGrid = new GameObject[gridSize][];
+
+            for (int row = 0; row < gridSize; row++)
+            {
+                fogGrid[row] = new GameObject[gridSize];
+                for (int col = 0; col < gridSize; col++)
+                    fogGrid[row][col] = InstantiateOnTile(fogElementPrefab, new Vector2Int(row, col), transform);
+            }
         }
 
         private Vector2Int GetRandomPositionOnEmptyTile()
@@ -185,6 +205,13 @@ namespace DBGA.GameManager
             return null;
         }
 
+        private GameObject GetFogAtPosition(Vector2Int position)
+        {
+            if (IsPositionInsideGrid(position))
+                return fogGrid[position.x][position.y];
+            return null;
+        }
+
         private Vector2Int GetNextPosition(Vector2Int currentPosition, Direction direction)
         {
             return direction switch
@@ -207,6 +234,12 @@ namespace DBGA.GameManager
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             currentPlayer.TeleportToNextPosition(randomPosition);
+        }
+
+        private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
+        {
+            GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
+            GetFogAtPosition(playerExploredTileEvent.positionOnGrid).SetActive(false);
         }
 
     }

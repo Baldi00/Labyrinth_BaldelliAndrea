@@ -6,7 +6,7 @@
 |---------------|-----|:-----:|
 |1.0| Grid|🔴|
 |1.1| Movement|🟢|
-|2.a| Fog of war|🔴|
+|2.a| Fog of war|🟢|
 |2.b| Monster tile|🟢|
 |2.c| Teleport tile|🟢|
 |2.d| Well tile|🟢|

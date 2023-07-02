@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using DBGA.Common;
+using DBGA.EventSystem;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,12 +22,15 @@ namespace DBGA.Player
         private Vector2Int positionOnGrid;
         private bool isInMoveAnimation;
 
+        private GameEventsManager gameEventsManager;
+
         public Vector2Int PositionOnGrid { get => positionOnGrid; }
         public bool IgnoreInputs { set; get; }
 
         void Awake()
         {
             currentArrowsCount = initialArrowsCount;
+            gameEventsManager = GameEventsManager.Instance;
         }
 
         /// <summary>
@@ -36,6 +40,7 @@ namespace DBGA.Player
         public void SetPositionOnGrid(Vector2Int positionOnGrid)
         {
             this.positionOnGrid = positionOnGrid;
+            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = positionOnGrid });
         }
 
         public void TeleportToNextPosition(Vector2Int nextPosition)
