@@ -29,7 +29,7 @@ namespace DBGA.GameManager
 
         [Header("Camera")]
         [SerializeField]
-        private CameraFollowPlayer camera;
+        private CameraFollowPlayer mainCamera;
 
         [Header("Map elements")]
         [SerializeField]
@@ -46,7 +46,7 @@ namespace DBGA.GameManager
                 grid = mapGenerator.GenerateMap(gridSize, tilesList);
 
             PlacePlayer();
-            camera.SetPlayerTransform(currentPlayer.transform);
+            mainCamera.SetPlayerTransform(currentPlayer.transform);
 
             PlaceMapElements();
         }
@@ -149,7 +149,6 @@ namespace DBGA.GameManager
 
         private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
         {
-            List<Direction> availableDirections = GetPlayerTile().GetAvailableDirections();
             Vector2Int nextPosition = GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
 
             if (IsPositionInsideGrid(nextPosition))

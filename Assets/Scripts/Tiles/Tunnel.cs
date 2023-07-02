@@ -16,6 +16,9 @@ namespace DBGA.Tiles
             public Tile tile;
         }
 
+        [SerializeField]
+        private Cross[] availableCrossings;
+
         private List<AdjacentTile> adjacentTiles;
 
         void Awake()
@@ -37,13 +40,13 @@ namespace DBGA.Tiles
         /// <returns>True if tunnel can be crossed till the end, false otherwise</returns>
         public bool CanCross(Direction enterDirection)
         {
-            List<Direction> outDirections = GetOutDirections(enterDirection);
+            Direction outDirection = GetOutDirection(enterDirection);
 
             // Something went wrong, can't cross the tile
-            if (outDirections.Count == 0)
+            if (outDirection == Direction.None)
                 return false;
 
-            AdjacentTile nextTile = GetAdjacentTile(outDirections[0]);
+            AdjacentTile nextTile = GetAdjacentTile(outDirection);
 
             // Something went wrong, can't cross the tile
             if (nextTile.direction == Direction.None)
@@ -75,13 +78,13 @@ namespace DBGA.Tiles
         /// <returns>The final destination of the tunnel if tunnel can be crossed, -inf position otherwise</returns>
         public Vector2Int GetFinalDestination(Direction enterDirection)
         {
-            List<Direction> outDirections = GetOutDirections(enterDirection);
+            Direction outDirection = GetOutDirection(enterDirection);
 
             // Something went wrong, can't cross the tile
-            if (outDirections.Count == 0)
+            if (outDirection == Direction.None)
                 return Vector2Int.one * int.MinValue;
 
-            AdjacentTile nextTile = GetAdjacentTile(outDirections[0]);
+            AdjacentTile nextTile = GetAdjacentTile(outDirection);
 
             // Something went wrong, can't cross the tile
             if (nextTile.direction == Direction.None)
@@ -112,14 +115,14 @@ namespace DBGA.Tiles
         /// <returns>The list of all crossing points in the tunnel</returns>
         public List<Vector2Int> GetAllCrossingPoints(Direction enterDirection)
         {
-            List<Direction> outDirections = GetOutDirections(enterDirection);
+            Direction outDirection = GetOutDirection(enterDirection);
             List<Vector2Int> crossingPoints = new List<Vector2Int>();
 
             // Something went wrong, can't cross the tile
-            if (outDirections.Count == 0)
+            if (outDirection == Direction.None)
                 return crossingPoints;
 
-            AdjacentTile nextTile = GetAdjacentTile(outDirections[0]);
+            AdjacentTile nextTile = GetAdjacentTile(outDirection);
 
             // Something went wrong, can't cross the tile
             if (nextTile.direction == Direction.None)
@@ -155,13 +158,13 @@ namespace DBGA.Tiles
         /// </param>
         public void RevealEntireTunnel(Direction enterDirection)
         {
-            List<Direction> outDirections = GetOutDirections(enterDirection);
+            Direction outDirection = GetOutDirection(enterDirection);
 
             // Something went wrong, can't cross the tile
-            if (outDirections.Count == 0)
+            if (outDirection == Direction.None)
                 return;
 
-            AdjacentTile nextTile = GetAdjacentTile(outDirections[0]);
+            AdjacentTile nextTile = GetAdjacentTile(outDirection);
 
             // Something went wrong, can't cross the tile
             if (nextTile.direction == Direction.None)
@@ -172,6 +175,40 @@ namespace DBGA.Tiles
             // Next tile is a tunnel, reveal next tile
             if (nextTile.tile is Tunnel nextTunnelTile)
                 nextTunnelTile.RevealEntireTunnel(nextTile.direction.GetOppositeDirection());
+        }
+
+        /// <summary>
+        /// Returns the list of available directions from this tile
+        /// </summary>
+        /// <returns>The list of available directions from this tile</returns>
+        public List<Direction> GetAvailableDirections()
+        {
+            HashSet<Direction> availableDirections = new HashSet<Direction>();
+            foreach (Cross cross in availableCrossings)
+            {
+                availableDirections.Add(cross.direction1);
+                availableDirections.Add(cross.direction2);
+            }
+            return availableDirections.ToList<Direction>();
+        }
+
+        /// <summary>
+        /// Returns the out direction of the tunnel if entering from the given direction
+        /// </summary>
+        /// <param name="enterDirection">The entrance direction in the tunnel.
+        /// (e.g. if player is under a tunnel and goes Up, it is entering in the tunnel from Down, then you should pass Down)
+        /// </param>
+        /// <returns>The out direction of the tunnel if entering from the given direction</returns>
+        private Direction GetOutDirection(Direction enterDirection)
+        {
+            foreach (Cross cross in availableCrossings)
+            {
+                if (cross.direction1 == enterDirection)
+                    return cross.direction2;
+                else if (cross.direction2 == enterDirection)
+                    return cross.direction1;
+            }
+            return Direction.None;
         }
 
         /// <summary>
@@ -189,5 +226,6 @@ namespace DBGA.Tiles
 
             return new AdjacentTile() { direction = Direction.None };
         }
+
     }
 }

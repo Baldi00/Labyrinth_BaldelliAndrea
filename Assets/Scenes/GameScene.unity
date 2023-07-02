@@ -202,7 +202,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalPosition: {x: 10, y: 5, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -307,7 +307,7 @@ MonoBehaviour:
   mapGenerator: {fileID: 1721960304}
   playerPrefab: {fileID: 8862266604122522133, guid: 16621445116d9bd46b53314e36b7ba59,
     type: 3}
-  camera: {fileID: 330585548}
+  mainCamera: {fileID: 330585548}
   mapElementsList: {fileID: 11400000, guid: 6be0b683e67814847bcafd9bd5544800, type: 2}
 --- !u!114 &1721960303
 MonoBehaviour:

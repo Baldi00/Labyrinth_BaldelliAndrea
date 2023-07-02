@@ -17,8 +17,8 @@ MonoBehaviour:
     prefab: {fileID: 713522266299360801, guid: 41d83fcfaadcee149aefa80b88a8bc56, type: 3}
     count: 1
   - mapElement: 1
-    prefab: {fileID: 0}
+    prefab: {fileID: 713522266299360801, guid: 7328cf7a8a1837340babd2e55d685be4, type: 3}
     count: 10
   - mapElement: 2
-    prefab: {fileID: 0}
+    prefab: {fileID: 713522266299360801, guid: 71aa72aa45b364e4ea42401e147dfb7f, type: 3}
     count: 10
