@@ -13,6 +13,8 @@ namespace DBGA.Player
         [SerializeField]
         private int initialArrowsCount = 5;
         [SerializeField]
+        private GameObject arrowPrefab;
+        [SerializeField]
         private float movementAnimationDuration = 1f;
         [SerializeField]
         private AnimationCurve moveAnimationSmoothing;
@@ -74,6 +76,19 @@ namespace DBGA.Player
                 return TunnelDetectedManagement(ref nextPosition, moveDirection, raycastHits);
             else
                 return MoveToNextTile(nextPosition, movementAnimationDuration);
+        }
+
+        public bool ShotArrow(Direction shotDirection)
+        {
+            if (currentArrowsCount <= 0)
+                return false;
+
+            currentArrowsCount--;
+            
+            Quaternion arrowRotation = GetArrowRotationFromDirection(shotDirection);
+            GameObject a = Instantiate(arrowPrefab, transform.position, arrowRotation);
+
+            return true;
         }
 
         private bool TunnelDetectedManagement(ref Vector2Int nextPosition, Direction moveDirection, RaycastHit[] raycastHits)
@@ -158,6 +173,17 @@ namespace DBGA.Player
             }
 
             isInMoveAnimation = false;
+        }
+
+        private Quaternion GetArrowRotationFromDirection(Direction shotDirection)
+        {
+            return shotDirection switch
+            {
+                Direction.Left => Quaternion.LookRotation(Vector3.left, Vector3.up),
+                Direction.Right => Quaternion.LookRotation(Vector3.right, Vector3.up),
+                Direction.Down => Quaternion.LookRotation(Vector3.back, Vector3.up),
+                _ => Quaternion.identity
+            };
         }
     }
 }

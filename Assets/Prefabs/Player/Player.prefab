@@ -49,6 +49,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialArrowsCount: 5
+  arrowPrefab: {fileID: 5458148781563337841, guid: e374b580bf1b68140968eff51e1570b2,
+    type: 3}
   movementAnimationDuration: 0.25
   moveAnimationSmoothing:
     serializedVersion: 2

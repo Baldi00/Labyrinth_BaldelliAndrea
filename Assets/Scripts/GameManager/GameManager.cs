@@ -195,7 +195,7 @@ namespace DBGA.GameManager
 
         private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
         {
-            throw new NotImplementedException();
+            currentPlayer.ShotArrow(inputArrowShotEvent.direction);
         }
 
         private Tile GetTileAtPosition(Vector2Int position)
