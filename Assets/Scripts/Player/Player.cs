@@ -1,7 +1,6 @@
 using System.Linq;
 using UnityEngine;
 using DBGA.Common;
-using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -23,6 +22,7 @@ namespace DBGA.Player
         private bool isInMoveAnimation;
 
         public Vector2Int PositionOnGrid { get => positionOnGrid; }
+        public bool IgnoreInputs { set; get; }
 
         void Awake()
         {
@@ -38,6 +38,13 @@ namespace DBGA.Player
             this.positionOnGrid = positionOnGrid;
         }
 
+        public void TeleportToNextPosition(Vector2Int nextPosition)
+        {
+            StopAllCoroutines();
+            isInMoveAnimation = false;
+            MoveToNextTile(nextPosition, 0);
+        }
+
         /// <summary>
         /// Tries to move the player to the next position
         /// </summary>
@@ -46,19 +53,22 @@ namespace DBGA.Player
         /// <returns>True if the movement had success (i.e. no walls were detected), false otherwise</returns>
         public bool TryMoveToNextPosition(Vector2Int nextPosition, Direction moveDirection)
         {
+            if (IgnoreInputs)
+                return false;
+
             Vector3 position3d = new(positionOnGrid.x, 0.25f, positionOnGrid.y);
             Vector3 nextPosition3d = new(nextPosition.x, 0.25f, nextPosition.y);
 
             RaycastHit[] raycastHits = Physics.RaycastAll(position3d, nextPosition3d - position3d, 1f);
 
             // A wall in front of player detected, no movement allowed
-            if (raycastHits.Any<RaycastHit>(hit => !hit.collider.isTrigger))
+            if (raycastHits.Any<RaycastHit>(hit => !hit.collider.isTrigger && hit.collider.CompareTag("Wall")))
                 return false;
 
             if (raycastHits.Any<RaycastHit>(hit => hit.collider.CompareTag("Tunnel")))
                 return TunnelDetectedManagement(ref nextPosition, moveDirection, raycastHits);
             else
-                return MoveToNextTile(nextPosition);
+                return MoveToNextTile(nextPosition, movementAnimationDuration);
         }
 
         private bool TunnelDetectedManagement(ref Vector2Int nextPosition, Direction moveDirection, RaycastHit[] raycastHits)
@@ -72,52 +82,56 @@ namespace DBGA.Player
             {
                 nextPosition = tunnel.GetFinalDestination(moveDirection.GetOppositeDirection());
                 tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
-                return MoveToNextTiles(nextPosition, tunnel.GetAllCrossingPoints(moveDirection.GetOppositeDirection()));
+                return MoveToNextTiles(
+                    nextPosition,
+                    tunnel.GetAllCrossingPoints(moveDirection.GetOppositeDirection()),
+                    movementAnimationDuration);
             }
             else
                 return false;
         }
 
-        private bool MoveToNextTile(Vector2Int nextPosition)
+        private bool MoveToNextTile(Vector2Int nextPosition, float animationDuration)
         {
             if (isInMoveAnimation)
                 return false;
 
             SetPositionOnGrid(nextPosition);
-            StartCoroutine(AnimateMovementToNextTile(nextPosition));
+            StartCoroutine(AnimateMovementToNextTile(nextPosition, animationDuration));
             return true;
         }
 
-        private bool MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions)
+        private bool MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions, float animationDuration)
         {
             if (isInMoveAnimation)
                 return false;
 
             SetPositionOnGrid(finalPosition);
-            StartCoroutine(AnimateMovementToNextTiles(crossingPositions));
+            StartCoroutine(AnimateMovementToNextTiles(crossingPositions, animationDuration));
             return true;
         }
 
-        private IEnumerator AnimateMovementToNextTile(Vector2Int nextPosition)
+        private IEnumerator AnimateMovementToNextTile(Vector2Int nextPosition, float animationDuration)
         {
             isInMoveAnimation = true;
             float animationTimer = 0;
             Vector3 startPosition3d = transform.position;
             Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
-            while (animationTimer < movementAnimationDuration)
+            while (animationTimer < animationDuration)
             {
                 transform.position = Vector3.Lerp(
                     startPosition3d,
                     nextPosition3d,
-                    moveAnimationSmoothing.Evaluate(animationTimer / movementAnimationDuration));
+                    moveAnimationSmoothing.Evaluate(animationTimer / animationDuration));
 
                 animationTimer += Time.deltaTime;
                 yield return null;
             }
+            transform.position = nextPosition3d;
             isInMoveAnimation = false;
         }
 
-        private IEnumerator AnimateMovementToNextTiles(List<Vector2Int> crossingPositions)
+        private IEnumerator AnimateMovementToNextTiles(List<Vector2Int> crossingPositions, float animationDuration)
         {
             isInMoveAnimation = true;
             foreach (Vector2Int nextPosition in crossingPositions)
@@ -125,16 +139,17 @@ namespace DBGA.Player
                 float animationTimer = 0;
                 Vector3 startPosition3d = transform.position;
                 Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
-                while (animationTimer < movementAnimationDuration)
+                while (animationTimer < animationDuration)
                 {
                     transform.position = Vector3.Lerp(
                         startPosition3d,
                         nextPosition3d,
-                        moveAnimationSmoothing.Evaluate(animationTimer / movementAnimationDuration));
+                        moveAnimationSmoothing.Evaluate(animationTimer / animationDuration));
 
                     animationTimer += Time.deltaTime;
                     yield return null;
                 }
+                transform.position = nextPosition3d;
             }
 
             isInMoveAnimation = false;

@@ -6,6 +6,13 @@ namespace DBGA.UI
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour, IGameEventsListener
     {
+        [Header("Win/Lose UI")]
+        [SerializeField]
+        private GameObject youWinUi;
+        [SerializeField]
+        private GameObject youLoseUi;
+
+        [Header("Special UI")]
         [SerializeField]
         private GameObject bloodUi;
         [SerializeField]
@@ -15,7 +22,7 @@ namespace DBGA.UI
 
         void Start()
         {
-            AddListener();
+            AddGameEventsListeners();
         }
 
         public void ReceiveGameEvent(GameEvent gameEvent)
@@ -31,14 +38,20 @@ namespace DBGA.UI
                 case TeleportTileAdjacentEvent teleportTileAdjacentEvent:
                     windUi.SetActive(teleportTileAdjacentEvent.isPlayerInside);
                     break;
+                case EnteredWellTileEvent:
+                case EnteredMonsterTileEvent:
+                    youLoseUi.SetActive(true);
+                    break;
             }
         }
 
-        private void AddListener()
+        private void AddGameEventsListeners()
         {
             GameEventsManager.Instance.AddGameEventListener(this, typeof(MonsterTileAdjacentEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(WellTileAdjacentEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(TeleportTileAdjacentEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
         }
     }
 }

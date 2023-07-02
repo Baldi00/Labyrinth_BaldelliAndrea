@@ -66,6 +66,13 @@ namespace DBGA.GameManager
                 case InputArrowShotEvent inputArrowShotEvent:
                     HandleInputArrowShotEvent(inputArrowShotEvent);
                     break;
+                case EnteredTeleportTileEvent:
+                    TeleportPlayerInRandomPosition();
+                    break;
+                case EnteredWellTileEvent:
+                case EnteredMonsterTileEvent:
+                    currentPlayer.IgnoreInputs = true;
+                    break;
             }
         }
 
@@ -76,6 +83,9 @@ namespace DBGA.GameManager
         {
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InputMoveEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InputArrowShotEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
         }
 
         /// <summary>
@@ -168,11 +178,6 @@ namespace DBGA.GameManager
             throw new NotImplementedException();
         }
 
-        private Tile GetPlayerTile()
-        {
-            return GetTileAtPosition(currentPlayer.PositionOnGrid);
-        }
-
         private Tile GetTileAtPosition(Vector2Int position)
         {
             if (IsPositionInsideGrid(position))
@@ -196,6 +201,12 @@ namespace DBGA.GameManager
         {
             return position.x >= 0 && position.y >= 0 &&
                 position.x < gridSize && position.y < gridSize;
+        }
+
+        private void TeleportPlayerInRandomPosition()
+        {
+            Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
+            currentPlayer.TeleportToNextPosition(randomPosition);
         }
 
     }
