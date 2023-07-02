@@ -31,6 +31,10 @@ namespace DBGA.GameManager
         [SerializeField]
         private CameraFollowPlayer camera;
 
+        [Header("Map elements")]
+        [SerializeField]
+        private MapElementsList mapElementsList;
+
         private Tile[][] grid;
         private Player.Player currentPlayer;
 
@@ -41,8 +45,10 @@ namespace DBGA.GameManager
             if (generateRandomMap)
                 grid = mapGenerator.GenerateMap(gridSize, tilesList);
 
-            SpawnPlayer();
+            PlacePlayer();
             camera.SetPlayerTransform(currentPlayer.transform);
+
+            PlaceMapElements();
         }
 
         void OnDestroy()
@@ -73,32 +79,67 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Spawns player on a random valid tile
+        /// Places player on a random empty tile
         /// </summary>
-        private void SpawnPlayer()
+        private void PlacePlayer()
+        {
+            Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
+            GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition);
+            currentPlayer = playerGameObject.GetComponent<Player.Player>();
+            currentPlayer.SetPositionOnGrid(randomPosition);
+        }
+
+        /// <summary>
+        /// Places monsters, teleports and wells on the grid
+        /// </summary>
+        private void PlaceMapElements()
+        {
+            foreach (MapElementsItem mapElementsItem in mapElementsList.mapElements)
+                for (int i = 0; i < mapElementsItem.count; i++)
+                {
+                    Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
+                    InstantiateOnTile(mapElementsItem.prefab, randomPosition);
+                    Tile placementTile = GetTileAtPosition(randomPosition);
+
+                    switch (mapElementsItem.mapElement)
+                    {
+                        case MapElement.MONSTER:
+                            placementTile.HasMonser = true;
+                            break;
+                        case MapElement.TELEPORT:
+                            placementTile.HasTeleport = true;
+                            break;
+                        case MapElement.WELL:
+                            placementTile.HasWell = true;
+                            break;
+                    }
+                }
+        }
+
+        private Vector2Int GetRandomPositionOnEmptyTile()
         {
             Vector2Int randomPosition;
             do
             {
-                randomPosition = RandomizePosition();
-            } while (!IsPlayerSpawnedOnValidTile(randomPosition));
+                randomPosition =
+                    new Vector2Int(UnityEngine.Random.Range(0, gridSize), UnityEngine.Random.Range(0, gridSize));
+            } while (!IsEmptyTile(randomPosition));
 
-            GameObject playerGameObject = Instantiate(
-                playerPrefab.gameObject,
-                new Vector3(randomPosition.x, 0, randomPosition.y),
-                Quaternion.identity);
-
-            currentPlayer = playerGameObject.GetComponent<Player.Player>();
-
-            currentPlayer.SetPositionOnGrid(randomPosition);
+            return randomPosition;
         }
 
-        private Vector2Int RandomizePosition()
+        private GameObject InstantiateOnTile(GameObject gameObject, Vector2Int position)
         {
-            return new Vector2Int(UnityEngine.Random.Range(0, gridSize), UnityEngine.Random.Range(0, gridSize));
+            return Instantiate(gameObject, new Vector3(position.x, 0, position.y), Quaternion.identity);
         }
 
-        private bool IsPlayerSpawnedOnValidTile(Vector2Int position)
+        /// <summary>
+        /// Checks if the tile is empty and can be used to place things.
+        /// Empty means that it is not a Tunnel tile, it has no monsters, teleports or wells
+        /// </summary>
+        /// <param name="position">The position on the grid of the tile to test</param>
+        /// <returns>True if the tile is empty, false otherwise</returns>
+        private bool IsEmptyTile(Vector2Int position)
         {
             Tile tile = grid[position.x][position.y];
             if (tile is Tunnel || tile.HasMonser || tile.HasTeleport || tile.HasWell)
@@ -130,7 +171,14 @@ namespace DBGA.GameManager
 
         private Tile GetPlayerTile()
         {
-            return grid[currentPlayer.PositionOnGrid.x][currentPlayer.PositionOnGrid.y];
+            return GetTileAtPosition(currentPlayer.PositionOnGrid);
+        }
+
+        private Tile GetTileAtPosition(Vector2Int position)
+        {
+            if (IsPositionInsideGrid(position))
+                return grid[position.x][position.y];
+            return null;
         }
 
         private Vector2Int GetNextPosition(Vector2Int currentPosition, Direction direction)
@@ -150,5 +198,6 @@ namespace DBGA.GameManager
             return position.x >= 0 && position.y >= 0 &&
                 position.x < gridSize && position.y < gridSize;
         }
+
     }
 }

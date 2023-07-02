@@ -308,6 +308,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 8862266604122522133, guid: 16621445116d9bd46b53314e36b7ba59,
     type: 3}
   camera: {fileID: 330585548}
+  mapElementsList: {fileID: 11400000, guid: 6be0b683e67814847bcafd9bd5544800, type: 2}
 --- !u!114 &1721960303
 MonoBehaviour:
   m_ObjectHideFlags: 0
