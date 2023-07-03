@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.Tiles
@@ -6,6 +7,7 @@ namespace DBGA.Tiles
     public struct TileListItem
     {
         public GameObject tilePrefab;
+        public Tile tile;
         public float probabilityWeight;
     }
 }

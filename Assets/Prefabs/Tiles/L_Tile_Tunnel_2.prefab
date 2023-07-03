@@ -319,6 +319,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisTileTrigger: {fileID: 3786050089399487412}
   adjacentTriggers: {fileID: 6923621364466278702}
+  outDirections: 0000000002000000
   availableCrossings:
   - direction1: 0
     direction2: 2

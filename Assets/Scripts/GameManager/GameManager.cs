@@ -167,11 +167,11 @@ namespace DBGA.GameManager
             if (mapContainer != null)
                 Destroy(mapContainer);
 
-            mapContainer = new("FogContainer");
+            mapContainer = new("MapContainer");
             mapContainer.transform.parent = transform;
 
             if (generateRandomMap)
-                grid = mapGenerator.GenerateMap(gridSize, tilesList, mapContainer.transform);
+                grid = mapGenerator.GenerateMapWFC(gridSize, tilesList, mapContainer.transform);
         }
 
         /// <summary>

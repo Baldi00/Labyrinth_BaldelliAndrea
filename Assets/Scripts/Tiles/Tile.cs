@@ -1,3 +1,5 @@
+using DBGA.Common;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.Tiles
@@ -9,10 +11,14 @@ namespace DBGA.Tiles
         private GameObject thisTileTrigger;
         [SerializeField]
         private GameObject adjacentTriggers;
+        [SerializeField]
+        private List<Direction> outDirections;
 
         private bool hasMonster;
         private bool hasWell;
         private bool hasTeleport;
+
+        public List<Direction> OutDirections { get => outDirections; }
 
         public bool HasMonster
         {

@@ -302,6 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thisTileTrigger: {fileID: 7068658505859735782}
   adjacentTriggers: {fileID: 5460324398762638496}
+  outDirections: 00000000010000000200000003000000
 --- !u!1 &3763954644908634978
 GameObject:
   m_ObjectHideFlags: 0
