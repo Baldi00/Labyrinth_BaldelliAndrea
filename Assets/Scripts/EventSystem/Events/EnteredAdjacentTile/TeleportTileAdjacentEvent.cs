@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace DBGA.EventSystem
 {
     public class TeleportTileAdjacentEvent : GameEvent

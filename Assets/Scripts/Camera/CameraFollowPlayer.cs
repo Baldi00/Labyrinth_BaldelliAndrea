@@ -16,7 +16,7 @@ namespace DBGA.Camera
 
         void FixedUpdate()
         {
-            transform.position = 
+            transform.position =
                 Vector3.Lerp(
                     transform.position,
                     new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z),

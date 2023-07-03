@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace DBGA.Common
+﻿namespace DBGA.Common
 {
     public interface ITunnelTrigger
     {

@@ -1,6 +1,6 @@
-using UnityEngine;
-using DBGA.EventSystem;
 using DBGA.Common;
+using DBGA.EventSystem;
+using UnityEngine;
 
 namespace DBGA.InputSystem
 {
@@ -38,7 +38,7 @@ namespace DBGA.InputSystem
         {
             inputMoveEvent = new InputMoveEvent();
             inputArrowShotEvent = new InputArrowShotEvent();
-            
+
             inputMoveEvent.callerGameObject = gameObject;
             inputArrowShotEvent.callerGameObject = gameObject;
 

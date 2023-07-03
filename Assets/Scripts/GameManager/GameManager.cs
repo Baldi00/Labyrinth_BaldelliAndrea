@@ -1,8 +1,8 @@
+using DBGA.Camera;
 using DBGA.Common;
 using DBGA.EventSystem;
 using DBGA.MapGeneration;
 using DBGA.Tiles;
-using DBGA.Camera;
 using UnityEngine;
 
 namespace DBGA.GameManager

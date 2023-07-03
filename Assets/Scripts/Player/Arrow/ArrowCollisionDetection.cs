@@ -1,7 +1,4 @@
-using DBGA.Common;
 using DBGA.EventSystem;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.Player
