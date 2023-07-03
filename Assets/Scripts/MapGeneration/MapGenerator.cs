@@ -15,6 +15,43 @@ namespace DBGA.MapGeneration
             public float max;
         }
 
+        private class State
+        {
+            public Tile[][] grid;
+            public List<Tile> domain;
+            public Vector2Int position;
+
+            public State(Tile[][] grid, List<Tile> domain, Vector2Int position)
+            {
+                int gridSize = grid.Length;
+                this.grid = new Tile[gridSize][];
+
+                for (int row = 0; row < gridSize; row++)
+                {
+                    this.grid[row] = new Tile[gridSize];
+                    for (int col = 0; col < gridSize; col++)
+                        this.grid[row][col] = grid[row][col];
+                }
+
+                this.domain = new List<Tile>(domain);
+                this.position = position;
+            }
+
+            public Tile GetAvailableTile()
+            {
+                Tile chosenTile = null;
+                if (domain.Count > 0)
+                {
+                    chosenTile = domain[Random.Range(0, domain.Count)];
+                    domain.Remove(chosenTile);
+                }
+                return chosenTile;
+            }
+        }
+
+        [SerializeField]
+        private GameObject blockTilePrefab;
+
         private int gridSize;
         private TilesList tilesList;
         private Tile[][] grid;
@@ -127,8 +164,6 @@ namespace DBGA.MapGeneration
             this.gridSize = gridSize;
             this.tilesList = tilesList;
 
-            Tile blockTile = tilesList.availableTiles[^1].tile;
-
             // Initialize matrices
             grid = new Tile[gridSize][];
             List<Tile>[][] domains = new List<Tile>[gridSize][];
@@ -144,8 +179,6 @@ namespace DBGA.MapGeneration
                 tilesList.availableTiles
                 .Select<TileListItem, Tile>(tli => tli.tile)
                 .ToList<Tile>();
-
-            allTilesPrefab.Remove(blockTile);
 
             for (int row = 0; row < gridSize; row++)
                 for (int col = 0; col < gridSize; col++)
@@ -171,6 +204,9 @@ namespace DBGA.MapGeneration
             Queue<Vector2Int> positionsToFill = new Queue<Vector2Int>();
             positionsToFill.Enqueue(randomPosition);
 
+            Stack<State> states = new Stack<State>();
+            State currentState = null;
+
             // Generate map
             while (positionsToFill.Count > 0)
             {
@@ -179,28 +215,26 @@ namespace DBGA.MapGeneration
                 // Choose a random tile from the available and instantiate it
                 List<Tile> domain = domains[positionToFill.x][positionToFill.y];
 
-                Tile randomTile;
-                if (domain.Count == 0)
-                    randomTile = blockTile;
-                else
-                    randomTile = domain[Random.Range(0, domain.Count)];
+                currentState = new State(grid, domain, positionToFill);
 
-                GameObject tilePrefab = tilesList.availableTiles
-                    .Where<TileListItem>(tli => tli.tile == randomTile)
-                    .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
-                    .ElementAt<GameObject>(0);
+                Tile chosenTile = null;
+                do
+                {
+                    chosenTile = currentState.GetAvailableTile();
+                    if (chosenTile == null)
+                    {
+                        currentState = states.Pop();
+                        grid = currentState.grid;
+                        positionToFill = currentState.position;
+                        positionsToFill.Clear();
+                    }
+                } while (chosenTile == null);
 
-                GameObject tileInstanceGameObject = Instantiate(
-                    tilePrefab,
-                    new Vector3(positionToFill.x, 0f, positionToFill.y),
-                    Quaternion.identity,
-                    parent);
-
-                grid[positionToFill.x][positionToFill.y] = tileInstanceGameObject.GetComponent<Tile>();
-                grid[positionToFill.x][positionToFill.y].PositionOnGrid = positionToFill;
+                states.Push(currentState);
+                grid[positionToFill.x][positionToFill.y] = chosenTile;
 
                 // Add next tiles
-                List<Direction> availableDirections = randomTile.OutDirections;
+                List<Direction> availableDirections = chosenTile.OutDirections;
 
                 foreach (Direction direction in availableDirections)
                 {
@@ -220,25 +254,29 @@ namespace DBGA.MapGeneration
                 }
             }
 
-            // Fill empty spaces
-            GameObject defaultTileGameObject = tilesList.availableTiles
-                    .Where<TileListItem>(tli => tli.tile == blockTile)
-                    .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
-                    .ElementAt<GameObject>(0);
+            grid = currentState.grid;
 
+            // Instantiate game objects
             for (int row = 0; row < gridSize; row++)
                 for (int col = 0; col < gridSize; col++)
-                    if (grid[row][col] == null)
-                    {
-                        GameObject tileInstanceGameObject = Instantiate(
-                            defaultTileGameObject,
-                            new Vector3(row, 0f, col),
-                            Quaternion.identity,
-                            parent);
+                {
+                    GameObject tilePrefab = blockTilePrefab;
 
-                        grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
-                        grid[row][col].PositionOnGrid = new Vector2Int(row, col);
-                    }
+                    if (grid[row][col] != null)
+                        tilePrefab = tilesList.availableTiles
+                                .Where<TileListItem>(tli => tli.tile == grid[row][col])
+                                .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
+                                .ElementAt<GameObject>(0);
+
+                    GameObject tileInstanceGameObject = Instantiate(
+                        tilePrefab,
+                        new Vector3(row, 0f, col),
+                        Quaternion.identity,
+                        parent);
+
+                    grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
+                    grid[row][col].PositionOnGrid = new Vector2Int(row, col);
+                }
 
             SetupTunnelAdjacentTiles();
 
