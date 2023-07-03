@@ -29,6 +29,8 @@ namespace DBGA.InputSystem
         private MovementInputKeys movementInputs;
         [SerializeField]
         private ArrowShootingInputKeys arrowShootingInputs;
+        [SerializeField]
+        private KeyCode toggleFogVisibilityKey;
 
         private InputMoveEvent inputMoveEvent;
         private InputArrowShotEvent inputArrowShotEvent;
@@ -54,6 +56,9 @@ namespace DBGA.InputSystem
             inputArrowShotEvent.direction = GetCurrentArrowShotDirection();
             if (inputArrowShotEvent.direction != Direction.None)
                 gameEventsManager.DispatchGameEvent(inputArrowShotEvent);
+
+            if (Input.GetKeyDown(toggleFogVisibilityKey))
+                gameEventsManager.DispatchGameEvent(new InputToggleFogVisibilityEvent());
         }
 
         private Direction GetCurrentInputMovementDirection()

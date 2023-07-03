@@ -25,7 +25,7 @@ namespace DBGA.MapGeneration
         /// <param name="gridSize">The size of the resulting grid map (e.g. if 20 the result is a 20x20 grid)</param>
         /// <param name="tileList">The list of available tiles</param>
         /// <returns>A random grid of tiles with the given size and tiles</returns>
-        public Tile[][] GenerateMap(int gridSize, TilesList tilesList)
+        public Tile[][] GenerateMap(int gridSize, TilesList tilesList, Transform parent)
         {
             this.gridSize = gridSize;
             this.tilesList = tilesList;
@@ -41,7 +41,7 @@ namespace DBGA.MapGeneration
                 {
                     GameObject randomTileGameObject = GetRandomTileFromAvailable();
                     GameObject tileInstanceGameObject =
-                        Instantiate(randomTileGameObject, new Vector3(row, 0f, col), Quaternion.identity, transform);
+                        Instantiate(randomTileGameObject, new Vector3(row, 0f, col), Quaternion.identity, parent);
 
                     grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
                     grid[row][col].PositionOnGrid = new Vector2Int(row, col);

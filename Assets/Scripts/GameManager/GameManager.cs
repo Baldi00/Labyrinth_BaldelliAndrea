@@ -34,8 +34,12 @@ namespace DBGA.GameManager
         [SerializeField]
         private GameObject fogElementPrefab;
 
+        private GameObject mapContainer;
         private Tile[][] grid;
+
         private GameObject[][] fogGrid;
+        private GameObject fogContainer;
+
         private Player.Player currentPlayer;
 
         private GameObject monster;
@@ -51,10 +55,7 @@ namespace DBGA.GameManager
         void Start()
         {
             AddGameEventListeners();
-
-            if (generateRandomMap)
-                grid = mapGenerator.GenerateMap(gridSize, tilesList);
-
+            PlaceMap();
             PlaceFog();
             PlaceMapElements();
             PlacePlayer();
@@ -75,6 +76,9 @@ namespace DBGA.GameManager
                     break;
                 case InputArrowShotEvent inputArrowShotEvent:
                     HandleInputArrowShotEvent(inputArrowShotEvent);
+                    break;
+                case InputToggleFogVisibilityEvent:
+                    HandleToggleFogVisibilityEvent();
                     break;
                 case EnteredTeleportTileEvent:
                     TeleportPlayerOntoRandomEmptyTile();
@@ -102,6 +106,7 @@ namespace DBGA.GameManager
         {
             gameEventsManager.AddGameEventListener(this, typeof(InputMoveEvent));
             gameEventsManager.AddGameEventListener(this, typeof(InputArrowShotEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(InputToggleFogVisibilityEvent));
             gameEventsManager.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
             gameEventsManager.AddGameEventListener(this, typeof(EnteredWellTileEvent));
             gameEventsManager.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
@@ -155,17 +160,39 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
+        /// Generates the map and instantiates it in game
+        /// </summary>
+        private void PlaceMap()
+        {
+            if (mapContainer != null)
+                Destroy(mapContainer);
+
+            mapContainer = new("FogContainer");
+            mapContainer.transform.parent = transform;
+
+            if (generateRandomMap)
+                grid = mapGenerator.GenerateMap(gridSize, tilesList, mapContainer.transform);
+        }
+
+        /// <summary>
         /// Places fog on the grid
         /// </summary>
         private void PlaceFog()
         {
+            if (fogContainer != null)
+                Destroy(fogContainer);
+
+            fogContainer = new("FogContainer");
+            fogContainer.transform.parent = transform;
+
             fogGrid = new GameObject[gridSize][];
 
             for (int row = 0; row < gridSize; row++)
             {
                 fogGrid[row] = new GameObject[gridSize];
                 for (int col = 0; col < gridSize; col++)
-                    fogGrid[row][col] = InstantiateOnTile(fogElementPrefab, new Vector2Int(row, col), transform);
+                    fogGrid[row][col] =
+                        InstantiateOnTile(fogElementPrefab, new Vector2Int(row, col), fogContainer.transform);
             }
         }
 
@@ -186,6 +213,13 @@ namespace DBGA.GameManager
             return randomPosition;
         }
 
+        /// <summary>
+        /// Instantiates the given game object in the given position of the grid with the given transform as parent
+        /// </summary>
+        /// <param name="gameObject">The game object to place</param>
+        /// <param name="position">The position on the grid on which the game object will be instantiated</param>
+        /// <param name="parent">The parent transform under which the game object will be instantiated</param>
+        /// <returns>The instantiated game object</returns>
         private GameObject InstantiateOnTile(GameObject gameObject, Vector2Int position, Transform parent)
         {
             return Instantiate(gameObject, new Vector3(position.x, 0, position.y), Quaternion.identity, parent);
@@ -326,6 +360,14 @@ namespace DBGA.GameManager
             TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
                 gameEventsManager.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent());
+        }
+
+        /// <summary>
+        /// Enables or disables the fog rendering
+        /// </summary>
+        private void HandleToggleFogVisibilityEvent()
+        {
+            fogContainer.SetActive(!fogContainer.activeSelf);
         }
     }
 }
