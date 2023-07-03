@@ -499,7 +499,7 @@ MonoBehaviour:
     shootDown: 107
     shootLeft: 106
     shootRight: 108
-  toggleFogVisibilityKey: 121
+  toggleFogVisibilityKey: 116
 --- !u!114 &1721960304
 MonoBehaviour:
   m_ObjectHideFlags: 0
