@@ -203,7 +203,7 @@ namespace DBGA.Tiles
         /// (e.g. if player is under a tunnel and goes Up, it is entering in the tunnel from Down, then you should pass Down)
         /// </param>
         /// <returns>The out direction of the tunnel if entering from the given direction</returns>
-        private Direction GetOutDirection(Direction enterDirection)
+        public Direction GetOutDirection(Direction enterDirection)
         {
             foreach (Cross cross in availableCrossings)
             {

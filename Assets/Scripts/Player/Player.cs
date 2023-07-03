@@ -15,6 +15,8 @@ namespace DBGA.Player
         [SerializeField]
         private GameObject arrowPrefab;
         [SerializeField]
+        private float arrowSpawnOffset;
+        [SerializeField]
         private float movementAnimationDuration = 1f;
         [SerializeField]
         private AnimationCurve moveAnimationSmoothing;
@@ -104,7 +106,7 @@ namespace DBGA.Player
         /// <summary>
         /// Shots an arrow in the given direction if player has some remaining arrows
         /// </summary>
-        /// <param name="shotDirection">The direction the arrow should be shot</param>
+        /// <param name="shotDirection">The direction in which the arrow should be shot</param>
         /// <returns>True if the arrow has been shot, false otherwise</returns>
         public bool ShotArrow(Direction shotDirection)
         {
@@ -116,8 +118,11 @@ namespace DBGA.Player
 
             currentArrowsCount--;
 
-            Quaternion arrowRotation = GetArrowRotationFromDirection(shotDirection);
-            Instantiate(arrowPrefab, transform.position, arrowRotation);
+            ArrowMover arrowMover =
+                Instantiate(arrowPrefab, GetArrowSpawnPosition(shotDirection), Quaternion.identity)
+                .GetComponent<ArrowMover>();
+
+            arrowMover.SetArrowDirection(shotDirection);
             gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
 
             return true;
@@ -235,19 +240,19 @@ namespace DBGA.Player
         }
 
         /// <summary>
-        /// Returns the rotation that the arrow should have if shot in the given direction
+        /// Returns the arrow spawn position based on the given direction and the set offset
         /// </summary>
         /// <param name="shotDirection">The direction in which the arrow should be shot</param>
-        /// <returns>The rotation that the arrow should have if shot in the given direction</returns>
-        private Quaternion GetArrowRotationFromDirection(Direction shotDirection)
+        /// <returns>The arrow spawn position based on the given direction and the set offset</returns>
+        private Vector3 GetArrowSpawnPosition(Direction shotDirection)
         {
-            return shotDirection switch
+            return transform.position + shotDirection switch
             {
-                Direction.Left => Quaternion.LookRotation(Vector3.left, Vector3.up),
-                Direction.Right => Quaternion.LookRotation(Vector3.right, Vector3.up),
-                Direction.Down => Quaternion.LookRotation(Vector3.back, Vector3.up),
-                _ => Quaternion.identity
-            };
+                Direction.Left => Vector3.left,
+                Direction.Right => Vector3.right,
+                Direction.Down => Vector3.back,
+                _ => Vector3.forward
+            } * arrowSpawnOffset;
         }
     }
 }

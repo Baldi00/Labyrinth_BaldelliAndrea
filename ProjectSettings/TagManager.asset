@@ -12,6 +12,7 @@ TagManager:
   - Teleport
   - AdjacentWell
   - Well
+  - TunnelCenter
   layers:
   - Default
   - TransparentFX

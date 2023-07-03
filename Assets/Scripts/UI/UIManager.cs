@@ -20,6 +20,8 @@ namespace DBGA.UI
         private string youLoseWellDescription;
         [SerializeField]
         private string youLoseNoArrowDescription;
+        [SerializeField]
+        private string youLoseArrowHitPlayerDescription;
 
         [Header("Special UI")]
         [SerializeField]
@@ -67,6 +69,10 @@ namespace DBGA.UI
                     youLoseDescription.text = youLoseNoArrowDescription;
                     youLoseUi.SetActive(true);
                     break;
+                case ArrowHitPlayerEvent:
+                    youLoseDescription.text = youLoseArrowHitPlayerDescription;
+                    youLoseUi.SetActive(true);
+                    break;
                 case ArrowCollidedWithMonsterEvent:
                     youWinUi.SetActive(true);
                     break;
@@ -94,6 +100,7 @@ namespace DBGA.UI
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InitializeArrowCountEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InvalidMoveEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
         }
     }
 }

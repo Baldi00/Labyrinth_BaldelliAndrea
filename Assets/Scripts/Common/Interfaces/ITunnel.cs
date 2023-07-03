@@ -10,5 +10,6 @@ namespace DBGA.Common
         public List<Vector2Int> GetAllCrossingPoints(Direction enterDirection);
         public void RevealEntireTunnel(Direction enterDirection);
         public List<Direction> GetAvailableDirections();
+        public Direction GetOutDirection(Direction enterDirection);
     }
 }

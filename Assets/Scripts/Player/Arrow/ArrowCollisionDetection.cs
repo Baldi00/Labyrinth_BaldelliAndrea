@@ -1,4 +1,7 @@
+using DBGA.Common;
 using DBGA.EventSystem;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.Player
@@ -25,8 +28,9 @@ namespace DBGA.Player
                     gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent());
                     Destroy(gameObject);
                     break;
-                case "Tunnel":
-                    // TODO: Arrow entered a tunnel
+                case "Player":
+                    gameEventsManager.DispatchGameEvent(new ArrowHitPlayerEvent());
+                    Destroy(gameObject);
                     break;
             }
         }

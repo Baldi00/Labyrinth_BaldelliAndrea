@@ -1058,6 +1058,7 @@ MonoBehaviour:
   youLoseMonsterDescription: The monster killed you
   youLoseWellDescription: You fell into a well
   youLoseNoArrowDescription: You have no more arrows to defeat the monster
+  youLoseArrowHitPlayerDescription: You killed yourself with an arrow
   bloodUi: {fileID: 8697117434882507735}
   windUi: {fileID: 8697117433863547695}
   moldUi: {fileID: 8697117435108040094}

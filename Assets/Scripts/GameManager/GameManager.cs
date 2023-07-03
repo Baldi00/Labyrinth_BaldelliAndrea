@@ -83,6 +83,7 @@ namespace DBGA.GameManager
                 case EnteredMonsterTileEvent:
                 case ArrowCollidedWithMonsterEvent:
                 case PlayerLostForNoArrowRemainingEvent:
+                case ArrowHitPlayerEvent:
                     currentPlayer.IgnoreInputs = true;
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
@@ -108,6 +109,7 @@ namespace DBGA.GameManager
             gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
             gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
             gameEventsManager.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
         }
 
         /// <summary>
