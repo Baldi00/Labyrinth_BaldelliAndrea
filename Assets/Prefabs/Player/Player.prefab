@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3603074137636166466}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -51,6 +51,7 @@ MonoBehaviour:
   initialArrowsCount: 5
   arrowPrefab: {fileID: 5458148781563337841, guid: e374b580bf1b68140968eff51e1570b2,
     type: 3}
+  arrowSpawnOffset: 0.5
   movementAnimationDuration: 0.25
   moveAnimationSmoothing:
     serializedVersion: 2
@@ -87,9 +88,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.125
-  m_Height: 4
+  m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 2, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &7838376993403128199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,8 +145,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3787328758760714398}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
-  m_LocalScale: {x: 0.25, y: 2, z: 0.25}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 0.25, y: 1, z: 0.25}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8004181616826012569}
