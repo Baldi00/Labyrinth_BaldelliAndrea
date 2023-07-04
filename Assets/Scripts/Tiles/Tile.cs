@@ -13,7 +13,6 @@ namespace DBGA.Tiles
         public bool HasMonster { get; set; }
         public bool HasWell { get; set; }
         public bool HasTeleport { get; set; }
-        public bool IsVoid { get; set; }
         public bool PlayerExplored { set; get; }
         public List<Direction> OutDirections { get => outDirections; }
         public Vector2Int PositionOnGrid { set; get; }

@@ -272,7 +272,7 @@ namespace DBGA.GameManager
                 return false;
 
             Tile tile = grid[position.x][position.y];
-            if (tile is Tunnel || tile.HasMonster || tile.HasTeleport || tile.HasWell || tile.IsVoid)
+            if (tile is Tunnel || tile is VoidTile || tile.HasMonster || tile.HasTeleport || tile.HasWell)
                 return false;
             return true;
         }

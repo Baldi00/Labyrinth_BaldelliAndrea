@@ -290,7 +290,6 @@ namespace DBGA.MapGeneration
 
                         grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
                         grid[row][col].PositionOnGrid = new Vector2Int(row, col);
-                        grid[row][col].IsVoid = true;
                     }
         }
     }

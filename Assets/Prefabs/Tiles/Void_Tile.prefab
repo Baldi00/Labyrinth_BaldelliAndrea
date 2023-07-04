@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2921796362434967615}
-  - component: {fileID: 6666364243938682727}
+  - component: {fileID: 1293592331294727610}
   m_Layer: 0
   m_Name: Void_Tile
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6666364243938682727
+--- !u!114 &1293592331294727610
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,9 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1798332517880667212}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 497ece1c909553a42a8a0e99cf0178e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 4c5e545ab10a8854683bad51ca7a987c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thisTileTrigger: {fileID: 0}
-  adjacentTriggers: {fileID: 0}
   outDirections: 
