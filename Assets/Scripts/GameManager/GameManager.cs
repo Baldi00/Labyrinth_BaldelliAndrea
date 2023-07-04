@@ -280,11 +280,15 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Teleport the monster onto another empty tile
+        /// Teleport the monster onto another empty tile inside the fog
         /// </summary>
         private void TeleportMonsterOntoRandomEmptyTile()
         {
-            Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
+            Vector2Int randomPosition;
+            do
+                randomPosition = GetRandomPositionOnEmptyTile();
+            while (GetTileAtPosition(randomPosition).PlayerExplored);
+
             monsterTile.HasMonster = false;
             monster.transform.position = new Vector3(randomPosition.x, 0f, randomPosition.y);
             monsterTile = GetTileAtPosition(randomPosition);
