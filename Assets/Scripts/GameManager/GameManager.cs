@@ -2,6 +2,7 @@ using DBGA.Camera;
 using DBGA.Common;
 using DBGA.EventSystem;
 using DBGA.MapGeneration;
+using DBGA.MazePlayer;
 using DBGA.Tiles;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace DBGA.GameManager
 
         [Header("Player")]
         [SerializeField]
-        private Player.Player playerPrefab;
+        private Player playerPrefab;
 
         [Header("Camera")]
         [SerializeField]
@@ -41,8 +42,8 @@ namespace DBGA.GameManager
         private GameObject[][] fogGrid;
         private GameObject fogContainer;
 
-        private List<Player.Player> players;
-        private Player.Player currentPlayer;
+        private List<Player> players;
+        private Player currentPlayer;
         private int currentPlayerIndex;
 
         private GameObject monster;
@@ -137,8 +138,8 @@ namespace DBGA.GameManager
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition, null);
-            players = new List<Player.Player>();
-            currentPlayer = playerGameObject.GetComponent<Player.Player>();
+            players = new List<Player>();
+            currentPlayer = playerGameObject.GetComponent<Player>();
             currentPlayer.SetPositionOnGrid(randomPosition);
             players.Add(currentPlayer);
             currentPlayerIndex = 0;
@@ -314,11 +315,11 @@ namespace DBGA.GameManager
         {
             Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
 
-            Player.Player.MoveOutcome moveOutcome = Player.Player.MoveOutcome.FAIL_CANT_PROCEED;
+            Player.MoveOutcome moveOutcome = Player.MoveOutcome.FAIL_CANT_PROCEED;
             if (Utils.IsPositionInsideGrid(nextPosition, gridSize))
                 moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
 
-            if (moveOutcome == Player.Player.MoveOutcome.FAIL_CANT_PROCEED)
+            if (moveOutcome == Player.MoveOutcome.FAIL_CANT_PROCEED)
                 gameEventsManager.DispatchGameEvent(new InvalidMoveEvent());
         }
 

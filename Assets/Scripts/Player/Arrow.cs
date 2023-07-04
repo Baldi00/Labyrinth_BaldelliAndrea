@@ -3,7 +3,7 @@ using DBGA.EventSystem;
 using System.Linq;
 using UnityEngine;
 
-namespace DBGA.Player
+namespace DBGA.MazePlayer
 {
     [DisallowMultipleComponent]
     public class Arrow : MonoBehaviour

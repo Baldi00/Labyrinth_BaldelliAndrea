@@ -1,7 +1,7 @@
 using DBGA.EventSystem;
 using UnityEngine;
 
-namespace DBGA.Player
+namespace DBGA.MazePlayer
 {
     [DisallowMultipleComponent]
     public class PlayerEnterTriggerDetector : MonoBehaviour
