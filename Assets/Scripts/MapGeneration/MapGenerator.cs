@@ -1,4 +1,5 @@
 using DBGA.Common;
+using DBGA.ThroughScenes;
 using DBGA.Tiles;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,17 +18,18 @@ namespace DBGA.MapGeneration
         }
 
         [SerializeField]
-        private TilesList tilesList;
+        private TilesList noDoubleLTilesList;
+        [SerializeField]
+        private TilesList completeTilesList;
         [SerializeField]
         private GameObject voidTilePrefab;
-        [SerializeField]
-        private bool animateGeneration;
         [SerializeField]
         [Range(0.01f, 1f)]
         private float generationAnimationTime = 0.01f;
 
         private int gridSize;
         private Tile[][] grid;
+        private TilesList currentTilesList;
 
         /// <summary>
         /// Generates and instantiates a maze-like grid of tiles using a modified version of
@@ -38,6 +40,12 @@ namespace DBGA.MapGeneration
         /// <param name="onMapGenerated">Callback called at the end of the generation</param>
         public IEnumerator GenerateMap(int gridSize, Transform parent, System.Action<Tile[][]> onMapGenerated)
         {
+            bool animateGeneration = ThroughScenesParameters.animateGeneration;
+            if (ThroughScenesParameters.useCompleteTilesListForGeneration)
+                currentTilesList = completeTilesList;
+            else
+                currentTilesList = noDoubleLTilesList;
+
             this.gridSize = gridSize;
 
             InitializeGrid();
@@ -115,7 +123,7 @@ namespace DBGA.MapGeneration
                 domains[row] = new List<Tile>[gridSize];
 
             List<Tile> allTilesPrefab =
-                tilesList.availableTiles
+                currentTilesList.availableTiles
                 .Select<TileListItem, Tile>(tli => tli.tile)
                 .ToList<Tile>();
 
@@ -192,12 +200,12 @@ namespace DBGA.MapGeneration
 
             float totalTilesProbabilityWeight = 0;
             foreach (Tile tile in domain)
-                totalTilesProbabilityWeight += tilesList.GetProbabilityWeight(tile);
+                totalTilesProbabilityWeight += currentTilesList.GetProbabilityWeight(tile);
 
             float previousRangeMin = 0f;
             foreach (Tile tile in domain)
             {
-                float tileProbabilityWeight = tilesList.GetProbabilityWeight(tile);
+                float tileProbabilityWeight = currentTilesList.GetProbabilityWeight(tile);
                 float rangeMax = previousRangeMin + tileProbabilityWeight / totalTilesProbabilityWeight;
                 ProbabilityRange probabilityRange = new() { min = previousRangeMin, max = rangeMax };
 
@@ -234,7 +242,7 @@ namespace DBGA.MapGeneration
         /// <param name="parent">The parent transform under which the game object will be instantiated</param>
         private void InstantiateAndPlaceTile(Tile tileToPlace, Vector2Int positionToFill, Transform parent)
         {
-            GameObject tilePrefab = tilesList.availableTiles
+            GameObject tilePrefab = currentTilesList.availableTiles
                 .Where<TileListItem>(tli => tli.tile == tileToPlace)
                 .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
                 .ElementAt<GameObject>(0);

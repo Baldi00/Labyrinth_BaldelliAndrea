@@ -512,10 +512,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe986a58082e86645a46c30b881a4a1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
+  noDoubleLTilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
+  completeTilesList: {fileID: 11400000, guid: 4140f60ecfa785f4c8e8d640821c0da0, type: 2}
   voidTilePrefab: {fileID: 1798332517880667212, guid: a11b9c92053db224394e038a566ec9f3,
     type: 3}
-  animateGeneration: 1
   generationAnimationTime: 0.01
 --- !u!1001 &8697117435589120512
 PrefabInstance:

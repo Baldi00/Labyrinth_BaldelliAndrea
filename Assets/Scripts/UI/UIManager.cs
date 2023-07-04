@@ -1,5 +1,6 @@
 using DBGA.EventSystem;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace DBGA.UI
@@ -86,6 +87,11 @@ namespace DBGA.UI
                     invalidMove.Show();
                     break;
             }
+        }
+
+        public void LoadMainMenuScene()
+        {
+            SceneManager.LoadScene("MainMenuScene");
         }
 
         private void AddGameEventsListeners()
