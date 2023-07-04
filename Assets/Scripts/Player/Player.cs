@@ -219,7 +219,7 @@ namespace DBGA.MazePlayer
                 yield return null;
             }
             transform.position = nextPosition3d;
-            
+
             isInMoveAnimation = false;
             gameEventsManager.DispatchGameEvent(new PlayerCompletedMovementEvent());
         }
