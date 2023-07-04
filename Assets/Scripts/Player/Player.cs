@@ -118,11 +118,11 @@ namespace DBGA.Player
 
             currentArrowsCount--;
 
-            ArrowMover arrowMover =
+            Arrow arrow =
                 Instantiate(arrowPrefab, GetArrowSpawnPosition(shotDirection), Quaternion.identity)
-                .GetComponent<ArrowMover>();
+                .GetComponent<Arrow>();
 
-            arrowMover.SetArrowDirection(shotDirection);
+            arrow.SetArrowDirection(shotDirection);
             gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
 
             return true;
