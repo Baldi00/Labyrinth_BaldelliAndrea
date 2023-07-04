@@ -9,7 +9,7 @@ namespace DBGA.Editor
     [DisallowMultipleComponent]
     public class CreateGameEventWindow : EditorWindow
     {
-        private const string templatePath = "Assets/Scripts/Utils/Editor/NewGameEventTemplate.txt";
+        private const string templatePath = "Assets/Scripts/Editor/NewGameEventTemplate.txt";
         private const string helpBoxText = "Put each parameter on a single line with its type. For example:\n\n" +
                 "Vector3 position\n" +
                 "Player player\n" +
