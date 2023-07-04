@@ -513,10 +513,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
-  animateGeneration: 1
-  generationTime: 0.01
   voidTilePrefab: {fileID: 1798332517880667212, guid: a11b9c92053db224394e038a566ec9f3,
     type: 3}
+  animateGeneration: 1
+  generationAnimationTime: 0.01
 --- !u!1001 &8697117435589120512
 PrefabInstance:
   m_ObjectHideFlags: 0

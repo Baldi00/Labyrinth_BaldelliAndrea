@@ -10,7 +10,7 @@ namespace DBGA.MapGeneration
     [DisallowMultipleComponent]
     public class MapGenerator : MonoBehaviour
     {
-        public struct ProbabilityRange
+        private struct ProbabilityRange
         {
             public float min;
             public float max;
@@ -19,20 +19,174 @@ namespace DBGA.MapGeneration
         [SerializeField]
         private TilesList tilesList;
         [SerializeField]
+        private GameObject voidTilePrefab;
+        [SerializeField]
         private bool animateGeneration;
         [SerializeField]
         [Range(0f, 1f)]
-        private float generationTime;
-        [SerializeField]
-        private GameObject voidTilePrefab;
+        private float generationAnimationTime = 0.01f;
 
         private int gridSize;
         private Tile[][] grid;
 
         /// <summary>
-        /// Initializes the tiles probabilities in order to pick them in a weighted way
+        /// Generates and instantiates a maze-like grid of tiles using a modified version of
+        /// Constraint Satisfaction Problem (CSP) without backtraking
         /// </summary>
-        private Dictionary<ProbabilityRange, Tile> GetTilesProbability(List<Tile> domain)
+        /// <param name="gridSize">The size of the grid (result grid will be size x size)</param>
+        /// <param name="parent">The transform under which the map will be instantiated</param>
+        /// <param name="onMapGenerated">Callback called at the end of the generation</param>
+        public IEnumerator GenerateMap(int gridSize, Transform parent, System.Action<Tile[][]> onMapGenerated)
+        {
+            this.gridSize = gridSize;
+
+            InitializeGrid();
+            List<Tile>[][] domains = InitializeDomains();
+
+            RemoveInvalidTilesFromBorderDomains(domains);
+
+            // Select random start position
+            Vector2Int randomStartPosition = new Vector2Int(Random.Range(0, gridSize), Random.Range(0, gridSize));
+
+            // Setup positions queue
+            Queue<Vector2Int> positionsToFill = new Queue<Vector2Int>();
+            positionsToFill.Enqueue(randomStartPosition);
+
+            // Fill positions
+            while (positionsToFill.Count > 0)
+            {
+                Vector2Int positionToFill = positionsToFill.Dequeue();
+
+                Tile chosenTile = ChooseTileForThisPosition(domains, ref positionToFill);
+
+                if (chosenTile != null)
+                {
+                    InstantiateAndPlaceTile(chosenTile, positionToFill, parent);
+
+                    List<Direction> availableDirectionsFromPlacedTile = chosenTile.OutDirections;
+
+                    foreach (Direction direction in availableDirectionsFromPlacedTile)
+                    {
+                        Vector2Int nextPosition = Utils.GetNextPosition(positionToFill, direction);
+                        if (IsNextPositionToFillValid(ref nextPosition, positionsToFill))
+                        {
+                            // Remove tiles from domain
+                            RemoveTilesWithoutOutDirectionFromDomain(
+                                direction.GetOppositeDirection(),
+                                domains[nextPosition.x][nextPosition.y]);
+
+                            // Enqueue next position
+                            positionsToFill.Enqueue(nextPosition);
+                        }
+                    }
+
+                    // Wait for the animation
+                    if (animateGeneration)
+                        yield return new WaitForSecondsRealtime(generationAnimationTime);
+                }
+            }
+
+            // Not all tile can be reached, this fills the remaining ones with a void tile
+            FillVoidTiles(parent);
+
+            ConnectTunnelTiles();
+            onMapGenerated?.Invoke(grid);
+        }
+
+        /// <summary>
+        /// Instantiates the grid and initializes it with null values
+        /// </summary>
+        private void InitializeGrid()
+        {
+            grid = new Tile[gridSize][];
+
+            for (int row = 0; row < gridSize; row++)
+                grid[row] = new Tile[gridSize];
+        }
+
+        /// <summary>
+        /// Instantiates and initializes all grid domains with all available tiles
+        /// </summary>
+        /// <returns>The grid of initialized domains</returns>
+        private List<Tile>[][] InitializeDomains()
+        {
+            List<Tile>[][] domains = new List<Tile>[gridSize][];
+            for (int row = 0; row < gridSize; row++)
+                domains[row] = new List<Tile>[gridSize];
+
+            List<Tile> allTilesPrefab =
+                tilesList.availableTiles
+                .Select<TileListItem, Tile>(tli => tli.tile)
+                .ToList<Tile>();
+
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    domains[row][col] = new List<Tile>(allTilesPrefab);
+            return domains;
+        }
+
+        /// <summary>
+        /// Removes all invalid tiles from the domains on the grid border
+        /// (e.g. T tile can't be placed on the bottom border because the player can't go any lower)
+        /// </summary>
+        /// <param name="domains">The grid of domains</param>
+        private void RemoveInvalidTilesFromBorderDomains(List<Tile>[][] domains)
+        {
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                {
+                    if (row == 0)
+                        RemoveTilesWithOutDirectionFromDomain(Direction.Down, domains[col][row]);
+                    if (row == gridSize - 1)
+                        RemoveTilesWithOutDirectionFromDomain(Direction.Up, domains[col][row]);
+                    if (col == 0)
+                        RemoveTilesWithOutDirectionFromDomain(Direction.Left, domains[col][row]);
+                    if (col == gridSize - 1)
+                        RemoveTilesWithOutDirectionFromDomain(Direction.Right, domains[col][row]);
+                }
+        }
+
+        /// <summary>
+        /// Removes all the tiles in the domain that have the given direction as an out direction
+        /// </summary>
+        /// <param name="direction">Tiles with this direction as out direction will be removed from domain</param>
+        /// <param name="domain">The domain on which to remove tiles</param>
+        private void RemoveTilesWithOutDirectionFromDomain(Direction direction, List<Tile> domain)
+        {
+            domain.RemoveAll(tile => tile.OutDirections.Contains(direction));
+        }
+
+        /// <summary>
+        /// Removes all the tiles in the domain that don't have the given direction as an out direction
+        /// </summary>
+        /// <param name="direction">Tiles without this direction as out direction will be removed from domain</param>
+        /// <param name="domain">The domain on which to remove tiles</param>
+        private void RemoveTilesWithoutOutDirectionFromDomain(Direction direction, List<Tile> domain)
+        {
+            domain.RemoveAll(tile => !tile.OutDirections.Contains(direction));
+        }
+
+        /// <summary>
+        /// Chooses a tile for the given position based on given probabilities for each tile
+        /// </summary>
+        /// <param name="domains">The grid of domains</param>
+        /// <param name="positionToFill">The position in which the grid should be placed</param>
+        /// <returns>The chosen tile, null if the domain for the given position is empty</returns>
+        private Tile ChooseTileForThisPosition(List<Tile>[][] domains, ref Vector2Int positionToFill)
+        {
+            List<Tile> domain = domains[positionToFill.x][positionToFill.y];
+            Tile chosenTile = null;
+            if (domain.Count > 0)
+                chosenTile = GetWeightedRandomTileFromAvailable(GetTilesProbabilityRanges(domain));
+            return chosenTile;
+        }
+
+        /// <summary>
+        /// Calculates and return the probability ranges for the tiles in the given domain
+        /// </summary>
+        /// <param name="domain">The domain on which to calculate the tiles probability ranges</param>
+        /// <returns>The probability ranges for the tiles in the given domain</returns>
+        private Dictionary<ProbabilityRange, Tile> GetTilesProbabilityRanges(List<Tile> domain)
         {
             Dictionary<ProbabilityRange, Tile> tilesProbability = new Dictionary<ProbabilityRange, Tile>();
 
@@ -59,6 +213,7 @@ namespace DBGA.MapGeneration
         /// <summary>
         /// Returns a weighted random tile between the available ones
         /// </summary>
+        /// <param name="availableTilesProbability">The probability ranges for each available tile</param>
         /// <returns>A weighted random tile between the available ones</returns>
         private Tile GetWeightedRandomTileFromAvailable(Dictionary<ProbabilityRange, Tile> availableTilesProbability)
         {
@@ -70,7 +225,72 @@ namespace DBGA.MapGeneration
             return null;
         }
 
-        private void SetupTunnelAdjacentTiles()
+        /// <summary>
+        /// Instantiates the given tile in scene in the given position with the given parent
+        /// and places it on the tiles grid in the given position
+        /// </summary>
+        /// <param name="tileToPlace">The chosen tile to place</param>
+        /// <param name="positionToFill">The position of the grid and scene in which the tile will be placed in</param>
+        /// <param name="parent">The parent transform under which the game object will be instantiated</param>
+        private void InstantiateAndPlaceTile(Tile tileToPlace, Vector2Int positionToFill, Transform parent)
+        {
+            GameObject tilePrefab = tilesList.availableTiles
+                .Where<TileListItem>(tli => tli.tile == tileToPlace)
+                .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
+                .ElementAt<GameObject>(0);
+
+            GameObject tileInstanceGameObject = Instantiate(
+                tilePrefab,
+                new Vector3(positionToFill.x, 0f, positionToFill.y),
+                Quaternion.identity,
+                parent);
+
+            grid[positionToFill.x][positionToFill.y] = tileInstanceGameObject.GetComponent<Tile>();
+            grid[positionToFill.x][positionToFill.y].PositionOnGrid = new Vector2Int(positionToFill.x, positionToFill.y);
+        }
+
+        /// <summary>
+        /// Checks if the given next position to fill is valid.
+        /// A next position to fill is valid if it isn't already in the next positions queue,
+        /// if it is inside the grid bounds and there isn't already a tile placed in that position
+        /// </summary>
+        /// <param name="nextPosition">The next position to check</param>
+        /// <param name="positionsToFill">The queue of next positions to fill</param>
+        /// <returns>True if the next position to fill is valid, false otherwise</returns>
+        private bool IsNextPositionToFillValid(ref Vector2Int nextPosition, Queue<Vector2Int> positionsToFill)
+        {
+            return
+                !positionsToFill.Contains(nextPosition) &&
+                Utils.IsPositionInsideGrid(nextPosition, gridSize) &&
+                grid[nextPosition.x][nextPosition.y] == null;
+        }
+
+        /// <summary>
+        /// Fills and sets the uninitialized tiles with a void tile.
+        /// </summary>
+        /// <param name="parent">The parent transform under which the game object will be instantiated</param>
+        private void FillVoidTiles(Transform parent)
+        {
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    if (grid[row][col] == null)
+                    {
+                        GameObject tileInstanceGameObject = Instantiate(
+                            voidTilePrefab,
+                            new Vector3(row, 0f, col),
+                            Quaternion.identity,
+                            parent);
+
+                        grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
+                        grid[row][col].PositionOnGrid = new Vector2Int(row, col);
+                        grid[row][col].IsVoid = true;
+                    }
+        }
+
+        /// <summary>
+        /// Connects the tunnel tiles by checking if there are adjacent tunnels
+        /// </summary>
+        private void ConnectTunnelTiles()
         {
             for (int row = 0; row < gridSize; row++)
                 for (int col = 0; col < gridSize; col++)
@@ -98,174 +318,6 @@ namespace DBGA.MapGeneration
                                     break;
                             }
                     }
-        }
-
-        public IEnumerator GenerateMapWFC(int gridSize, Transform parent, System.Action<Tile[][]> onMapGenerated)
-        {
-            this.gridSize = gridSize;
-
-            // Initialize matrices
-            grid = new Tile[gridSize][];
-            List<Tile>[][] domains = new List<Tile>[gridSize][];
-
-            for (int row = 0; row < gridSize; row++)
-            {
-                grid[row] = new Tile[gridSize];
-                domains[row] = new List<Tile>[gridSize];
-            }
-
-            // Initialize domains (every domain contains all tiles)
-            List<Tile> allTilesPrefab =
-                tilesList.availableTiles
-                .Select<TileListItem, Tile>(tli => tli.tile)
-                .ToList<Tile>();
-
-            for (int row = 0; row < gridSize; row++)
-                for (int col = 0; col < gridSize; col++)
-                    domains[row][col] = new List<Tile>(allTilesPrefab);
-
-            // Remove borders
-            for (int row = 0; row < gridSize; row++)
-                for (int col = 0; col < gridSize; col++)
-                {
-                    if (row == 0)
-                        RemoveTilesWithOutDirectionFromDomain(Direction.Down, domains[col][row]);
-                    if (row == gridSize - 1)
-                        RemoveTilesWithOutDirectionFromDomain(Direction.Up, domains[col][row]);
-                    if (col == 0)
-                        RemoveTilesWithOutDirectionFromDomain(Direction.Left, domains[col][row]);
-                    if (col == gridSize - 1)
-                        RemoveTilesWithOutDirectionFromDomain(Direction.Right, domains[col][row]);
-                }
-
-            // Select random position
-            Vector2Int randomPosition = new Vector2Int(Random.Range(0, gridSize), Random.Range(0, gridSize));
-
-            Queue<Vector2Int> positionsToFill = new Queue<Vector2Int>();
-            positionsToFill.Enqueue(randomPosition);
-
-            // Generate map
-            while (positionsToFill.Count > 0)
-            {
-                Vector2Int positionToFill = positionsToFill.Dequeue();
-
-                // Choose a random tile from the available and instantiate it
-                List<Tile> domain = domains[positionToFill.x][positionToFill.y];
-
-                Tile chosenTile = GetAvailableTile(domain);
-                grid[positionToFill.x][positionToFill.y] = chosenTile;
-
-                // Instantiate game object
-                if (grid[positionToFill.x][positionToFill.y] != null)
-                {
-                    GameObject tilePrefab = tilesList.availableTiles
-                            .Where<TileListItem>(tli => tli.tile == grid[positionToFill.x][positionToFill.y])
-                            .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
-                            .ElementAt<GameObject>(0);
-
-                    GameObject tileInstanceGameObject = Instantiate(
-                        tilePrefab,
-                        new Vector3(positionToFill.x, 0f, positionToFill.y),
-                        Quaternion.identity,
-                        parent);
-
-                    grid[positionToFill.x][positionToFill.y] = tileInstanceGameObject.GetComponent<Tile>();
-                    grid[positionToFill.x][positionToFill.y].PositionOnGrid = new Vector2Int(positionToFill.x, positionToFill.y);
-
-                    if (animateGeneration)
-                        yield return new WaitForSecondsRealtime(generationTime);
-                }
-
-                // Add next tiles
-                List<Direction> availableDirections = chosenTile.OutDirections;
-
-                foreach (Direction direction in availableDirections)
-                {
-                    Vector2Int nextPosition = GetNextPosition(positionToFill, direction);
-                    if (!positionsToFill.Contains(nextPosition) &&
-                        IsPositionInsideGrid(nextPosition) &&
-                        grid[nextPosition.x][nextPosition.y] == null)
-                    {
-                        // Remove tiles from domain
-                        RemoveTilesWithoutOutDirectionFromDomain(
-                            direction.GetOppositeDirection(),
-                            domains[nextPosition.x][nextPosition.y]);
-
-                        // Enqueue next position
-                        positionsToFill.Enqueue(nextPosition);
-                    }
-                }
-            }
-
-            // Fill empty tiles
-            for (int row = 0; row < gridSize; row++)
-                for (int col = 0; col < gridSize; col++)
-                    if (grid[row][col] == null)
-                    {
-                        GameObject tileInstanceGameObject = Instantiate(
-                            voidTilePrefab,
-                            new Vector3(row, 0f, col),
-                            Quaternion.identity,
-                            parent);
-
-                        grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
-                        grid[row][col].PositionOnGrid = new Vector2Int(row, col);
-                        grid[row][col].IsVoid = true;
-                    }
-
-            SetupTunnelAdjacentTiles();
-
-            onMapGenerated?.Invoke(grid);
-        }
-
-        private void RemoveTilesWithOutDirectionFromDomain(Direction direction, List<Tile> domain)
-        {
-            domain.RemoveAll(tile => tile.OutDirections.Contains(direction));
-        }
-
-        private void RemoveTilesWithoutOutDirectionFromDomain(Direction direction, List<Tile> domain)
-        {
-            domain.RemoveAll(tile => !tile.OutDirections.Contains(direction));
-        }
-
-        /// <summary>
-        /// Returns the next position on the grid from the current position on the grid in the given direction
-        /// </summary>
-        /// <param name="currentPosition">The current position on the grid</param>
-        /// <param name="direction">The direction in which you search the next position</param>
-        /// <returns>The next position on the grid from the current position on the grid in the given direction</returns>
-        private Vector2Int GetNextPosition(Vector2Int currentPosition, Direction direction)
-        {
-            return direction switch
-            {
-                Direction.Up => new Vector2Int(currentPosition.x, currentPosition.y + 1),
-                Direction.Down => new Vector2Int(currentPosition.x, currentPosition.y - 1),
-                Direction.Left => new Vector2Int(currentPosition.x - 1, currentPosition.y),
-                Direction.Right => new Vector2Int(currentPosition.x + 1, currentPosition.y),
-                _ => new Vector2Int(currentPosition.x, currentPosition.y)
-            };
-        }
-
-        /// <summary>
-        /// Checks if the given position is on the grid or not
-        /// </summary>
-        /// <param name="position">The position to test</param>
-        /// <returns>True if the given position is on the grid, false if is outside</returns>
-        private bool IsPositionInsideGrid(Vector2Int position)
-        {
-            return position.x >= 0 && position.y >= 0 &&
-                position.x < gridSize && position.y < gridSize;
-        }
-
-        private Tile GetAvailableTile(List<Tile> domain)
-        {
-            Tile chosenTile = null;
-            if (domain.Count > 0)
-            {
-                chosenTile = GetWeightedRandomTileFromAvailable(GetTilesProbability(domain));
-                domain.Remove(chosenTile);
-            }
-            return chosenTile;
         }
     }
 }

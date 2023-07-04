@@ -175,7 +175,7 @@ namespace DBGA.GameManager
             mapContainer.transform.parent = transform;
 
             if (generateRandomMap)
-                StartCoroutine(mapGenerator.GenerateMapWFC(gridSize, mapContainer.transform, onMapGenerated));
+                StartCoroutine(mapGenerator.GenerateMap(gridSize, mapContainer.transform, onMapGenerated));
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace DBGA.GameManager
         /// <returns>The tile in the given position on the grid, null if position is out of the grid</returns>
         private Tile GetTileAtPosition(Vector2Int position)
         {
-            if (IsPositionInsideGrid(position))
+            if (Utils.IsPositionInsideGrid(position, gridSize))
                 return grid[position.x][position.y];
             return null;
         }
@@ -265,38 +265,9 @@ namespace DBGA.GameManager
         /// <returns>The fog game object in the given position on the grid, null if position is out of the grid</returns>
         private GameObject GetFogAtPosition(Vector2Int position)
         {
-            if (IsPositionInsideGrid(position))
+            if (Utils.IsPositionInsideGrid(position, gridSize))
                 return fogGrid[position.x][position.y];
             return null;
-        }
-
-        /// <summary>
-        /// Returns the next position on the grid from the current position on the grid in the given direction
-        /// </summary>
-        /// <param name="currentPosition">The current position on the grid</param>
-        /// <param name="direction">The direction in which you search the next position</param>
-        /// <returns>The next position on the grid from the current position on the grid in the given direction</returns>
-        private Vector2Int GetNextPosition(Vector2Int currentPosition, Direction direction)
-        {
-            return direction switch
-            {
-                Direction.Up => new Vector2Int(currentPosition.x, currentPosition.y + 1),
-                Direction.Down => new Vector2Int(currentPosition.x, currentPosition.y - 1),
-                Direction.Left => new Vector2Int(currentPosition.x - 1, currentPosition.y),
-                Direction.Right => new Vector2Int(currentPosition.x + 1, currentPosition.y),
-                _ => new Vector2Int(currentPosition.x, currentPosition.y)
-            };
-        }
-
-        /// <summary>
-        /// Checks if the given position is on the grid or not
-        /// </summary>
-        /// <param name="position">The position to test</param>
-        /// <returns>True if the given position is on the grid, false if is outside</returns>
-        private bool IsPositionInsideGrid(Vector2Int position)
-        {
-            return position.x >= 0 && position.y >= 0 &&
-                position.x < gridSize && position.y < gridSize;
         }
 
         /// <summary>
@@ -326,10 +297,10 @@ namespace DBGA.GameManager
         /// <param name="inputMoveEvent">The event that triggered the movement containing the direction of the movement</param>
         private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
         {
-            Vector2Int nextPosition = GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
+            Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
 
             bool successfulMove = false;
-            if (IsPositionInsideGrid(nextPosition))
+            if (Utils.IsPositionInsideGrid(nextPosition, gridSize))
                 successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
 
             if (!successfulMove)
