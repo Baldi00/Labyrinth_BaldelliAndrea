@@ -342,7 +342,8 @@ namespace DBGA.GameManager
         /// </summary>
         private void HandleToggleFogVisibilityEvent()
         {
-            fogContainer.SetActive(!fogContainer.activeSelf);
+            if (fogContainer != null)
+                fogContainer.SetActive(!fogContainer.activeSelf);
         }
     }
 }
