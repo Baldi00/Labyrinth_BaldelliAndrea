@@ -1,6 +1,6 @@
 {
-    "name": "DBGA.Utils.Editor",
-    "rootNamespace": "DBGA.Utils.Editor",
+    "name": "DBGA.Editor",
+    "rootNamespace": "DBGA.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"

@@ -4,7 +4,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace DBGA.Utils.Editor
+namespace DBGA.Editor
 {
     [DisallowMultipleComponent]
     public class CreateGameEventWindow : EditorWindow
