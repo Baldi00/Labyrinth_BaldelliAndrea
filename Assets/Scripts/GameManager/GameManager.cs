@@ -93,6 +93,7 @@ namespace DBGA.GameManager
                 case PlayerLostForNoArrowRemainingEvent:
                 case ArrowHitPlayerEvent:
                     currentPlayer.IgnoreInputs = true;
+                    fogContainer.SetActive(false);
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
                     HandlePlayerExploredTileEvent(playerExploredTileEvent);
