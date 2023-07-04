@@ -219,7 +219,9 @@ namespace DBGA.Player
                 yield return null;
             }
             transform.position = nextPosition3d;
+            
             isInMoveAnimation = false;
+            gameEventsManager.DispatchGameEvent(new PlayerCompletedMovementEvent());
         }
 
         /// <summary>
@@ -249,6 +251,7 @@ namespace DBGA.Player
             }
 
             isInMoveAnimation = false;
+            gameEventsManager.DispatchGameEvent(new PlayerCompletedMovementEvent());
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using DBGA.Common;
 using DBGA.EventSystem;
 using DBGA.MapGeneration;
 using DBGA.Tiles;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DBGA.GameManager
@@ -40,7 +41,9 @@ namespace DBGA.GameManager
         private GameObject[][] fogGrid;
         private GameObject fogContainer;
 
+        private List<Player.Player> players;
         private Player.Player currentPlayer;
+        private int currentPlayerIndex;
 
         private GameObject monster;
         private Tile monsterTile;
@@ -92,7 +95,7 @@ namespace DBGA.GameManager
                 case ArrowCollidedWithMonsterEvent:
                 case PlayerLostForNoArrowRemainingEvent:
                 case ArrowHitPlayerEvent:
-                    currentPlayer.IgnoreInputs = true;
+                    players.ForEach(player => player.IgnoreInputs = true);
                     fogContainer.SetActive(false);
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
@@ -100,6 +103,9 @@ namespace DBGA.GameManager
                     break;
                 case ArrowCollidedWithWallEvent:
                     HandleArrowCollidedWithWallEvent();
+                    break;
+                case PlayerCompletedMovementEvent:
+                    ProceedToNextPlayer();
                     break;
             }
         }
@@ -116,9 +122,10 @@ namespace DBGA.GameManager
             gameEventsManager.AddGameEventListener(this, typeof(EnteredWellTileEvent));
             gameEventsManager.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
             gameEventsManager.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
+            gameEventsManager.AddGameEventListener(this, typeof(PlayerCompletedMovementEvent));
             gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
             gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
             gameEventsManager.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
         }
 
@@ -130,8 +137,11 @@ namespace DBGA.GameManager
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition, null);
+            players = new List<Player.Player>();
             currentPlayer = playerGameObject.GetComponent<Player.Player>();
             currentPlayer.SetPositionOnGrid(randomPosition);
+            players.Add(currentPlayer);
+            currentPlayerIndex = 0;
         }
 
         /// <summary>
@@ -319,6 +329,7 @@ namespace DBGA.GameManager
         private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
         {
             currentPlayer.ShotArrow(inputArrowShotEvent.direction);
+            currentPlayer.IgnoreInputs = true;
         }
 
         /// <summary>
@@ -340,6 +351,8 @@ namespace DBGA.GameManager
             TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
                 gameEventsManager.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent());
+            else
+                ProceedToNextPlayer();
         }
 
         /// <summary>
@@ -349,6 +362,17 @@ namespace DBGA.GameManager
         {
             if (fogContainer != null)
                 fogContainer.SetActive(!fogContainer.activeSelf);
+        }
+
+        /// <summary>
+        /// Selects the playing player as current player
+        /// </summary>
+        private void ProceedToNextPlayer()
+        {
+            currentPlayer.IgnoreInputs = true;
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+            currentPlayer = players[currentPlayerIndex];
+            currentPlayer.IgnoreInputs = false;
         }
     }
 }
