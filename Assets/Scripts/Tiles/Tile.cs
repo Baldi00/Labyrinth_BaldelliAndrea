@@ -8,82 +8,14 @@ namespace DBGA.Tiles
     public class Tile : MonoBehaviour
     {
         [SerializeField]
-        private GameObject thisTileTrigger;
-        [SerializeField]
-        private GameObject adjacentTriggers;
-        [SerializeField]
         private List<Direction> outDirections;
 
-        private bool hasMonster;
-        private bool hasWell;
-        private bool hasTeleport;
-
-        public List<Direction> OutDirections { get => outDirections; }
-
-        public bool HasMonster
-        {
-            set
-            {
-                hasMonster = value;
-                if (value)
-                {
-                    thisTileTrigger.tag = "Monster";
-                    adjacentTriggers.tag = "AdjacentMonster";
-                }
-                else
-                {
-                    thisTileTrigger.tag = "Untagged";
-                    adjacentTriggers.tag = "Untagged";
-                }
-            }
-
-            get => hasMonster;
-        }
-
-        public bool HasWell
-        {
-            set
-            {
-                hasWell = value;
-                if (value)
-                {
-                    thisTileTrigger.tag = "Well";
-                    adjacentTriggers.tag = "AdjacentWell";
-                }
-                else
-                {
-                    thisTileTrigger.tag = "Untagged";
-                    adjacentTriggers.tag = "Untagged";
-                }
-            }
-
-            get => hasWell;
-        }
-
-        public bool HasTeleport
-        {
-            set
-            {
-                hasTeleport = value;
-                if (value)
-                {
-                    thisTileTrigger.tag = "Teleport";
-                    adjacentTriggers.tag = "AdjacentTeleport";
-                }
-                else
-                {
-                    thisTileTrigger.tag = "Untagged";
-                    adjacentTriggers.tag = "Untagged";
-                }
-            }
-
-            get => hasTeleport;
-        }
-
+        public bool HasMonster { get; set; }
+        public bool HasWell { get; set; }
+        public bool HasTeleport { get; set; }
         public bool IsVoid { get; set; }
-
         public bool PlayerExplored { set; get; }
-
+        public List<Direction> OutDirections { get => outDirections; }
         public Vector2Int PositionOnGrid { set; get; }
     }
 }
