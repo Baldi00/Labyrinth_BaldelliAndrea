@@ -28,40 +28,42 @@ namespace DBGA.MapGeneration
 
         private int gridSize;
         private Tile[][] grid;
-        private Dictionary<ProbabilityRange, GameObject> availableTilesWithProbability;
 
         /// <summary>
         /// Initializes the tiles probabilities in order to pick them in a weighted way
         /// </summary>
-        private void InitializeTilesAndProbability()
+        private Dictionary<ProbabilityRange, Tile> GetTilesProbability(List<Tile> domain)
         {
-            availableTilesWithProbability = new Dictionary<ProbabilityRange, GameObject>();
+            Dictionary<ProbabilityRange, Tile> tilesProbability = new Dictionary<ProbabilityRange, Tile>();
 
             float totalTilesProbabilityWeight = 0;
-            foreach (TileListItem tileListItem in tilesList.availableTiles)
-                totalTilesProbabilityWeight += tileListItem.probabilityWeight;
+            foreach (Tile tile in domain)
+                totalTilesProbabilityWeight += tilesList.GetProbabilityWeight(tile);
 
             float previousRangeMin = 0f;
-            foreach (TileListItem tileListItem in tilesList.availableTiles)
+            foreach (Tile tile in domain)
             {
-                float rangeMax = previousRangeMin + tileListItem.probabilityWeight / totalTilesProbabilityWeight;
+                float tileProbabilityWeight = tilesList.GetProbabilityWeight(tile);
+                float rangeMax = previousRangeMin + tileProbabilityWeight / totalTilesProbabilityWeight;
                 ProbabilityRange probabilityRange = new() { min = previousRangeMin, max = rangeMax };
 
-                if (!availableTilesWithProbability.ContainsKey(probabilityRange))
-                    availableTilesWithProbability.Add(probabilityRange, tileListItem.tilePrefab);
+                if (!tilesProbability.ContainsKey(probabilityRange))
+                    tilesProbability.Add(probabilityRange, tile);
 
                 previousRangeMin = rangeMax;
             }
+
+            return tilesProbability;
         }
 
         /// <summary>
         /// Returns a weighted random tile between the available ones
         /// </summary>
         /// <returns>A weighted random tile between the available ones</returns>
-        private GameObject GetRandomTileFromAvailable()
+        private Tile GetWeightedRandomTileFromAvailable(Dictionary<ProbabilityRange, Tile> availableTilesProbability)
         {
             float randomNumber = Random.Range(0f, 1f);
-            foreach (KeyValuePair<ProbabilityRange, GameObject> tile in availableTilesWithProbability)
+            foreach (KeyValuePair<ProbabilityRange, Tile> tile in availableTilesProbability)
                 if (randomNumber >= tile.Key.min && randomNumber < tile.Key.max)
                     return tile.Value;
 
@@ -260,7 +262,7 @@ namespace DBGA.MapGeneration
             Tile chosenTile = null;
             if (domain.Count > 0)
             {
-                chosenTile = domain[Random.Range(0, domain.Count)];
+                chosenTile = GetWeightedRandomTileFromAvailable(GetTilesProbability(domain));
                 domain.Remove(chosenTile);
             }
             return chosenTile;
