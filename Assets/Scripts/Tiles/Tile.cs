@@ -80,6 +80,8 @@ namespace DBGA.Tiles
             get => hasTeleport;
         }
 
+        public bool IsVoid { get; set; }
+
         public bool PlayerExplored { set; get; }
 
         public Vector2Int PositionOnGrid { set; get; }

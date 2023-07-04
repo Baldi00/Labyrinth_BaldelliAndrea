@@ -16,6 +16,9 @@ namespace DBGA.Camera
 
         void FixedUpdate()
         {
+            if (playerTransform == null)
+                return;
+
             transform.position =
                 Vector3.Lerp(
                     transform.position,
@@ -26,6 +29,11 @@ namespace DBGA.Camera
         public void SetPlayerTransform(Transform playerTransform)
         {
             this.playerTransform = playerTransform;
+        }
+
+        public void SetSize(float size)
+        {
+            UnityEngine.Camera.main.orthographicSize = size;
         }
     }
 }

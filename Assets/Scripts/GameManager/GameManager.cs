@@ -16,8 +16,6 @@ namespace DBGA.GameManager
         [SerializeField]
         private int gridSize;
         [SerializeField]
-        private TilesList tilesList;
-        [SerializeField]
         private MapGenerator mapGenerator;
 
         [Header("Player")]
@@ -27,6 +25,8 @@ namespace DBGA.GameManager
         [Header("Camera")]
         [SerializeField]
         private CameraFollowPlayer mainCamera;
+        [SerializeField]
+        private float inGameCameraSize = 5.4f;
 
         [Header("Map elements")]
         [SerializeField]
@@ -55,11 +55,15 @@ namespace DBGA.GameManager
         void Start()
         {
             AddGameEventListeners();
-            PlaceMap();
-            PlaceFog();
-            PlaceMapElements();
-            PlacePlayer();
-            mainCamera.SetPlayerTransform(currentPlayer.transform);
+            PlaceMap((grid) =>
+            {
+                this.grid = grid;
+                PlaceFog();
+                PlaceMapElements();
+                PlacePlayer();
+                mainCamera.SetPlayerTransform(currentPlayer.transform);
+                mainCamera.SetSize(inGameCameraSize);
+            });
         }
 
         void OnDestroy()
@@ -162,7 +166,7 @@ namespace DBGA.GameManager
         /// <summary>
         /// Generates the map and instantiates it in game
         /// </summary>
-        private void PlaceMap()
+        private void PlaceMap(System.Action<Tile[][]> onMapGenerated)
         {
             if (mapContainer != null)
                 Destroy(mapContainer);
@@ -171,7 +175,7 @@ namespace DBGA.GameManager
             mapContainer.transform.parent = transform;
 
             if (generateRandomMap)
-                grid = mapGenerator.GenerateMapWFC(gridSize, tilesList, mapContainer.transform);
+                StartCoroutine(mapGenerator.GenerateMapWFC(gridSize, mapContainer.transform, onMapGenerated));
         }
 
         /// <summary>
@@ -227,7 +231,7 @@ namespace DBGA.GameManager
 
         /// <summary>
         /// Checks if the tile is empty and can be used to place things.
-        /// Empty means that it is not a Tunnel tile, it has no monsters, teleports, wells or player on it
+        /// Empty means that it is not a Tunnel tile, it has no monsters, teleports, wells or player on it and it's not void
         /// </summary>
         /// <param name="position">The position on the grid of the tile to test</param>
         /// <returns>True if the tile is empty, false otherwise</returns>
@@ -237,7 +241,7 @@ namespace DBGA.GameManager
                 return false;
 
             Tile tile = grid[position.x][position.y];
-            if (tile is Tunnel || tile.HasMonster || tile.HasTeleport || tile.HasWell)
+            if (tile is Tunnel || tile.HasMonster || tile.HasTeleport || tile.HasWell || tile.IsVoid)
                 return false;
             return true;
         }
