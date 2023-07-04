@@ -32,5 +32,25 @@ namespace DBGA.Common
             return position.x >= 0 && position.y >= 0 &&
                 position.x < gridSize && position.y < gridSize;
         }
+
+        /// <summary>
+        /// Converts a generic array into a generic matrix
+        /// </summary>
+        /// <typeparam name="T">The type of the array to convert into matrix</typeparam>
+        /// <param name="array">The input array to convert into matrix</param>
+        /// <param name="rows">The number of rows of the matrix</param>
+        /// <param name="cols">The number of columns of the matrix</param>
+        /// <returns>The matrix representation of the given array</returns>
+        public static T[][] ArrayToMatrix<T>(T[] array, int rows, int cols)
+        {
+            T[][] matrix = new T[rows][];
+            for (int i = 0; i < rows; i++)
+            {
+                matrix[i] = new T[cols];
+                for (int j = 0; j < cols; j++)
+                    matrix[i][j] = array[i * cols + j];
+            }
+            return matrix;
+        }
     }
 }

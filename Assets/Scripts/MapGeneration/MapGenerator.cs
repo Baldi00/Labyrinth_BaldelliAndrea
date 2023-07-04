@@ -97,7 +97,6 @@ namespace DBGA.MapGeneration
             // Not all tile can be reached, this fills the remaining ones with a void tile
             FillVoidTiles(parent);
 
-            ConnectTunnelTiles();
             onMapGenerated?.Invoke(grid);
         }
 
@@ -292,39 +291,6 @@ namespace DBGA.MapGeneration
                         grid[row][col] = tileInstanceGameObject.GetComponent<Tile>();
                         grid[row][col].PositionOnGrid = new Vector2Int(row, col);
                         grid[row][col].IsVoid = true;
-                    }
-        }
-
-        /// <summary>
-        /// Connects the tunnel tiles by checking if there are adjacent tunnels
-        /// </summary>
-        private void ConnectTunnelTiles()
-        {
-            for (int row = 0; row < gridSize; row++)
-                for (int col = 0; col < gridSize; col++)
-                    if (grid[row][col].gameObject.CompareTag("Tunnel"))
-                    {
-                        Tunnel tunnelTile = grid[row][col] as Tunnel;
-                        foreach (Direction direction in tunnelTile.GetAvailableDirections())
-                            switch (direction)
-                            {
-                                case Direction.Right:
-                                    if (row < gridSize - 1)
-                                        tunnelTile.AddAdjacentTile(Direction.Right, grid[row + 1][col]);
-                                    break;
-                                case Direction.Left:
-                                    if (row > 0)
-                                        tunnelTile.AddAdjacentTile(Direction.Left, grid[row - 1][col]);
-                                    break;
-                                case Direction.Up:
-                                    if (col < gridSize - 1)
-                                        tunnelTile.AddAdjacentTile(Direction.Up, grid[row][col + 1]);
-                                    break;
-                                case Direction.Down:
-                                    if (col > 0)
-                                        tunnelTile.AddAdjacentTile(Direction.Down, grid[row][col - 1]);
-                                    break;
-                            }
                     }
         }
     }

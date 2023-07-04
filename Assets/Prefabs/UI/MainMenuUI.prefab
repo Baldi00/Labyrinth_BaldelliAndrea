@@ -348,7 +348,7 @@ GameObject:
   - component: {fileID: 3895434889006824037}
   - component: {fileID: 5550915577183857189}
   m_Layer: 5
-  m_Name: HandMadeMazeText
+  m_Name: PrecomputedMazeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -415,7 +415,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: '"Handmade" Maze'
+  m_Text: Precomputed Maze
 --- !u!1 &4758708492340376223
 GameObject:
   m_ObjectHideFlags: 0
@@ -563,7 +563,7 @@ GameObject:
   - component: {fileID: 4277150309999027085}
   - component: {fileID: 5067466008524598804}
   m_Layer: 5
-  m_Name: HandMadeMazeButton
+  m_Name: PrecomputedMazeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -13,7 +13,7 @@ namespace DBGA.UI
 
         public void LoadHandMadeMazeScene()
         {
-            SceneManager.LoadScene("HandMadeMazeScene");
+            SceneManager.LoadScene("PrecomputedMazeScene");
         }
 
         public void LoadConnectedGeneratedMazeScene()

@@ -14,6 +14,8 @@ namespace DBGA.GameManager
     {
         [Header("Map generation")]
         [SerializeField]
+        private GameObject precomputedMap;
+        [SerializeField]
         private bool generateRandomMap;
         [SerializeField]
         private int gridSize;
@@ -62,6 +64,7 @@ namespace DBGA.GameManager
             PlaceMap((grid) =>
             {
                 this.grid = grid;
+                ConnectTunnelTiles();
                 PlaceFog();
                 PlaceMapElements();
                 PlacePlayer();
@@ -183,11 +186,27 @@ namespace DBGA.GameManager
             if (mapContainer != null)
                 Destroy(mapContainer);
 
-            mapContainer = new("MapContainer");
-            mapContainer.transform.parent = transform;
-
             if (generateRandomMap)
+            {
+                mapContainer = new("MapContainer");
                 StartCoroutine(mapGenerator.GenerateMap(gridSize, mapContainer.transform, onMapGenerated));
+            }
+            else
+            {
+                mapContainer = Instantiate(precomputedMap, Vector3.zero, Quaternion.identity, transform);
+                mapContainer.name = "MapContainer";
+                Tile[] tiles = new Tile[gridSize * gridSize];
+                for(int childIndex = 0; childIndex < mapContainer.transform.childCount; childIndex++)
+                    tiles[childIndex] = mapContainer.transform.GetChild(childIndex).GetComponent<Tile>();
+
+                Tile[][] grid = Utils.ArrayToMatrix<Tile>(tiles, gridSize, gridSize);
+                for (int row = 0; row < gridSize; row++)
+                    for (int col = 0; col < gridSize; col++)
+                        grid[row][col].PositionOnGrid = new Vector2Int(row, col);
+
+                onMapGenerated?.Invoke(grid);
+            }
+            mapContainer.transform.parent = transform;
         }
 
         /// <summary>
@@ -374,6 +393,39 @@ namespace DBGA.GameManager
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
             currentPlayer = players[currentPlayerIndex];
             currentPlayer.IgnoreInputs = false;
+        }
+
+        /// <summary>
+        /// Connects the tunnel tiles by checking if there are adjacent tunnels
+        /// </summary>
+        private void ConnectTunnelTiles()
+        {
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    if (grid[row][col].gameObject.CompareTag("Tunnel"))
+                    {
+                        Tunnel tunnelTile = grid[row][col] as Tunnel;
+                        foreach (Direction direction in tunnelTile.GetAvailableDirections())
+                            switch (direction)
+                            {
+                                case Direction.Right:
+                                    if (row < gridSize - 1)
+                                        tunnelTile.AddAdjacentTile(Direction.Right, grid[row + 1][col]);
+                                    break;
+                                case Direction.Left:
+                                    if (row > 0)
+                                        tunnelTile.AddAdjacentTile(Direction.Left, grid[row - 1][col]);
+                                    break;
+                                case Direction.Up:
+                                    if (col < gridSize - 1)
+                                        tunnelTile.AddAdjacentTile(Direction.Up, grid[row][col + 1]);
+                                    break;
+                                case Direction.Down:
+                                    if (col > 0)
+                                        tunnelTile.AddAdjacentTile(Direction.Down, grid[row][col - 1]);
+                                    break;
+                            }
+                    }
         }
     }
 }

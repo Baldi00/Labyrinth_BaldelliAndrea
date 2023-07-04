@@ -4,7 +4,7 @@
 
 |#| Requirement | State |
 |---------------|-----|:-----:|
-|1.0| Grid|🔴|
+|1.0| Grid|🟢|
 |1.1| Movement|🟢|
 |2.a| Fog of war|🟢|
 |2.b| Monster tile|🟢|
