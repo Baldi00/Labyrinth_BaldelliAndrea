@@ -137,10 +137,10 @@ namespace DBGA.Player
         /// <returns>True if movement had success, false otherwise</returns>
         private bool HandleTunnelMovement(Direction moveDirection, ITunnel tunnel)
         {
+            tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
             if (tunnel.CanCross(moveDirection.GetOppositeDirection()))
             {
                 Vector2Int nextPosition = tunnel.GetFinalDestination(moveDirection.GetOppositeDirection());
-                tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
                 return MoveToNextTiles(
                     nextPosition,
                     tunnel.GetAllCrossingPoints(moveDirection.GetOppositeDirection()),
