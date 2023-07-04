@@ -303,11 +303,11 @@ namespace DBGA.GameManager
         {
             Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
 
-            bool successfulMove = false;
+            Player.Player.MoveOutcome moveOutcome = Player.Player.MoveOutcome.FAIL_CANT_PROCEED;
             if (Utils.IsPositionInsideGrid(nextPosition, gridSize))
-                successfulMove = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
+                moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
 
-            if (!successfulMove)
+            if (moveOutcome == Player.Player.MoveOutcome.FAIL_CANT_PROCEED)
                 gameEventsManager.DispatchGameEvent(new InvalidMoveEvent());
         }
 

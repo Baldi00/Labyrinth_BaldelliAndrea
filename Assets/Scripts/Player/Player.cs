@@ -10,6 +10,14 @@ namespace DBGA.Player
     [DisallowMultipleComponent]
     public class Player : MonoBehaviour
     {
+        public enum MoveOutcome
+        {
+            FAIL_IGNORE_INPUTS,
+            FAIL_INSIDE_ANIMATION,
+            FAIL_CANT_PROCEED,
+            SUCCESS
+        }
+
         [SerializeField]
         private int initialArrowsCount = 5;
         [SerializeField]
@@ -76,11 +84,11 @@ namespace DBGA.Player
         /// </summary>
         /// <param name="nextPosition">The next position the player should be placed to</param>
         /// <param name="moveDirection">The direction in which the player is trying to move</param>
-        /// <returns>True if the movement had success (i.e. no walls were detected), false otherwise</returns>
-        public bool TryMoveToNextPosition(Vector2Int nextPosition, Direction moveDirection)
+        /// <returns>The outcome of the movement</returns>
+        public MoveOutcome TryMoveToNextPosition(Vector2Int nextPosition, Direction moveDirection)
         {
             if (IgnoreInputs)
-                return false;
+                return MoveOutcome.FAIL_IGNORE_INPUTS;
 
             Vector3 position3d = new(positionOnGrid.x, 0.25f, positionOnGrid.y);
             Vector3 nextPosition3d = new(nextPosition.x, 0.25f, nextPosition.y);
@@ -89,7 +97,7 @@ namespace DBGA.Player
 
             // A wall in front of player detected, no movement allowed
             if (raycastHits.Any<RaycastHit>(hit => !hit.collider.isTrigger && hit.collider.CompareTag("Wall")))
-                return false;
+                return MoveOutcome.FAIL_CANT_PROCEED;
 
             if (raycastHits.Any<RaycastHit>(hit => hit.collider.CompareTag("Tunnel")))
             {
@@ -134,9 +142,12 @@ namespace DBGA.Player
         /// </summary>
         /// <param name="moveDirection">The direction in which the player wants to move</param>
         /// <param name="tunnel">The first tunnel tile encountered</param>
-        /// <returns>True if movement had success, false otherwise</returns>
-        private bool HandleTunnelMovement(Direction moveDirection, ITunnel tunnel)
+        /// <returns>The outcome of the movement</returns>
+        private MoveOutcome HandleTunnelMovement(Direction moveDirection, ITunnel tunnel)
         {
+            if (isInMoveAnimation)
+                return MoveOutcome.FAIL_INSIDE_ANIMATION;
+
             tunnel.RevealEntireTunnel(moveDirection.GetOppositeDirection());
             if (tunnel.CanCross(moveDirection.GetOppositeDirection()))
             {
@@ -147,7 +158,7 @@ namespace DBGA.Player
                     movementAnimationDuration);
             }
             else
-                return false;
+                return MoveOutcome.FAIL_CANT_PROCEED;
         }
 
         /// <summary>
@@ -155,16 +166,17 @@ namespace DBGA.Player
         /// </summary>
         /// <param name="nextPosition">The position in which the player should be placed in</param>
         /// <param name="animationDuration">The duration of the animation</param>
-        /// <returns>True if movement succeeded, false otherwise</returns>
-        private bool MoveToNextTile(Vector2Int nextPosition, float animationDuration)
+        /// <returns>The outcome of the movement</returns>
+        private MoveOutcome MoveToNextTile(Vector2Int nextPosition, float animationDuration)
         {
             if (isInMoveAnimation)
-                return false;
+                return MoveOutcome.FAIL_INSIDE_ANIMATION;
 
             SetPositionOnGrid(nextPosition);
             animateMovementToNextTileCoroutine =
                 StartCoroutine(AnimateMovementToNextTile(nextPosition, animationDuration));
-            return true;
+
+            return MoveOutcome.SUCCESS;
         }
 
         /// <summary>
@@ -173,16 +185,16 @@ namespace DBGA.Player
         /// <param name="finalPosition">The final position in which the player should be placed in</param>
         /// <param name="crossingPositions">The list of position the player should pass in</param>
         /// <param name="animationDuration">The duration of the animation</param>
-        /// <returns>True if movement succeeded, false otherwise</returns>
-        private bool MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions, float animationDuration)
+        /// <returns>The outcome of the movement</returns>
+        private MoveOutcome MoveToNextTiles(Vector2Int finalPosition, List<Vector2Int> crossingPositions, float animationDuration)
         {
             if (isInMoveAnimation)
-                return false;
+                return MoveOutcome.FAIL_INSIDE_ANIMATION;
 
             SetPositionOnGrid(finalPosition);
             animateMovementToNextTilesCoroutine =
                 StartCoroutine(AnimateMovementToNextTiles(crossingPositions, animationDuration));
-            return true;
+            return MoveOutcome.SUCCESS;
         }
 
         /// <summary>
