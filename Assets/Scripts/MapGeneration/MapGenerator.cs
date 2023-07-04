@@ -23,7 +23,7 @@ namespace DBGA.MapGeneration
         [SerializeField]
         private bool animateGeneration;
         [SerializeField]
-        [Range(0f, 1f)]
+        [Range(0.01f, 1f)]
         private float generationAnimationTime = 0.01f;
 
         private int gridSize;
