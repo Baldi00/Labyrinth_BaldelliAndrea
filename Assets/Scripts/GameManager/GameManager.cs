@@ -57,6 +57,8 @@ namespace DBGA.GameManager
 
         private GameEventsManager gameEventsManager;
 
+        private bool isGameEnded;
+
         void Awake()
         {
             ThroughScenesParameters.mapGenerationError = false;
@@ -106,6 +108,7 @@ namespace DBGA.GameManager
                 case ArrowCollidedWithMonsterEvent:
                 case PlayerLostForNoArrowRemainingEvent:
                 case ArrowHitPlayerEvent:
+                    isGameEnded = true;
                     players.ForEach(player => player.IgnoreInputs = true);
                     SetFogVisibility(false);
                     break;
@@ -252,7 +255,7 @@ namespace DBGA.GameManager
             do
             {
                 iterations++;
-                if(iterations > 1000)
+                if (iterations > 1000)
                 {
                     ThroughScenesParameters.mapGenerationError = true;
                     SceneManager.LoadScene("MainMenuScene");
@@ -423,6 +426,9 @@ namespace DBGA.GameManager
         /// </summary>
         private void ProceedToNextPlayer()
         {
+            if (isGameEnded)
+                return;
+
             currentPlayer.IgnoreInputs = true;
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
             currentPlayer = players[currentPlayerIndex];
