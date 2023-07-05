@@ -41,8 +41,9 @@ namespace DBGA.GameManager
         private GameObject mapContainer;
         private Tile[][] grid;
 
-        private GameObject[][] fogGrid;
+        private Fog[][] fogGrid;
         private GameObject fogContainer;
+        private bool isFogVisible;
 
         private List<Player> players;
         private Player currentPlayer;
@@ -100,7 +101,7 @@ namespace DBGA.GameManager
                 case PlayerLostForNoArrowRemainingEvent:
                 case ArrowHitPlayerEvent:
                     players.ForEach(player => player.IgnoreInputs = true);
-                    fogContainer.SetActive(false);
+                    SetFogVisibility(false);
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
                     HandlePlayerExploredTileEvent(playerExploredTileEvent);
@@ -196,7 +197,7 @@ namespace DBGA.GameManager
                 mapContainer = Instantiate(precomputedMap, Vector3.zero, Quaternion.identity, transform);
                 mapContainer.name = "MapContainer";
                 Tile[] tiles = new Tile[gridSize * gridSize];
-                for(int childIndex = 0; childIndex < mapContainer.transform.childCount; childIndex++)
+                for (int childIndex = 0; childIndex < mapContainer.transform.childCount; childIndex++)
                     tiles[childIndex] = mapContainer.transform.GetChild(childIndex).GetComponent<Tile>();
 
                 Tile[][] grid = Utils.ArrayToMatrix<Tile>(tiles, gridSize, gridSize);
@@ -220,15 +221,17 @@ namespace DBGA.GameManager
             fogContainer = new("FogContainer");
             fogContainer.transform.parent = transform;
 
-            fogGrid = new GameObject[gridSize][];
+            fogGrid = new Fog[gridSize][];
 
             for (int row = 0; row < gridSize; row++)
             {
-                fogGrid[row] = new GameObject[gridSize];
+                fogGrid[row] = new Fog[gridSize];
                 for (int col = 0; col < gridSize; col++)
                     fogGrid[row][col] =
-                        InstantiateOnTile(fogElementPrefab, new Vector2Int(row, col), fogContainer.transform);
+                        InstantiateOnTile(fogElementPrefab, new Vector2Int(row, col), fogContainer.transform)
+                        .GetComponent<Fog>();
             }
+            isFogVisible = true;
         }
 
         /// <summary>
@@ -294,7 +297,7 @@ namespace DBGA.GameManager
         /// </summary>
         /// <param name="position">The position of the fog game object you want to get</param>
         /// <returns>The fog game object in the given position on the grid, null if position is out of the grid</returns>
-        private GameObject GetFogAtPosition(Vector2Int position)
+        private Fog GetFogAtPosition(Vector2Int position)
         {
             if (Utils.IsPositionInsideGrid(position, gridSize))
                 return fogGrid[position.x][position.y];
@@ -358,8 +361,11 @@ namespace DBGA.GameManager
         /// <param name="playerExploredTileEvent"></param>
         private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
         {
-            GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
-            GetFogAtPosition(playerExploredTileEvent.positionOnGrid).SetActive(false);
+            if (!GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored)
+            {
+                GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
+                GetFogAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
+            }
         }
 
         /// <summary>
@@ -376,12 +382,25 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Enables or disables the fog rendering
+        /// Toggles fog rendering for each tile
         /// </summary>
         private void HandleToggleFogVisibilityEvent()
         {
-            if (fogContainer != null)
-                fogContainer.SetActive(!fogContainer.activeSelf);
+            isFogVisible = !isFogVisible;
+            SetFogVisibility(isFogVisible);
+        }
+
+        /// <summary>
+        /// Sets fog visibility for each tile
+        /// </summary>
+        private void SetFogVisibility(bool visible)
+        {
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    if (!visible)
+                        fogGrid[row][col].Hide();
+                    else if (!grid[row][col].PlayerExplored)
+                        fogGrid[row][col].Show();
         }
 
         /// <summary>
