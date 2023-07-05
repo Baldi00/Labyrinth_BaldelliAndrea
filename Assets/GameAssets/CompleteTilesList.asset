@@ -16,11 +16,11 @@ MonoBehaviour:
   - tilePrefab: {fileID: 2664765375972663749, guid: 517cbec9afdc1dc499b6dfd9c5435069,
       type: 3}
     tile: {fileID: -6222829852241191335, guid: 517cbec9afdc1dc499b6dfd9c5435069, type: 3}
-    probabilityWeight: 1
+    probabilityWeight: 0
   - tilePrefab: {fileID: 2664765375972663749, guid: aa3e7674adda23744a99d4b898725b8a,
       type: 3}
     tile: {fileID: -4968479251068929719, guid: aa3e7674adda23744a99d4b898725b8a, type: 3}
-    probabilityWeight: 1
+    probabilityWeight: 0
   - tilePrefab: {fileID: 6498141239548852476, guid: c83a2e01d2de63d4cb6b0b186f400c56,
       type: 3}
     tile: {fileID: -1026705329457222924, guid: c83a2e01d2de63d4cb6b0b186f400c56, type: 3}

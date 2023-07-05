@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DBGA.Common
 {
     [Serializable]
-    public struct MapElementsItem
+    public class MapElementsItem
     {
         public MapElement mapElement;
         public GameObject prefab;

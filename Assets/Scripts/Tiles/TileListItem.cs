@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DBGA.Tiles
 {
     [System.Serializable]
-    public struct TileListItem
+    public class TileListItem
     {
         public GameObject tilePrefab;
         public Tile tile;

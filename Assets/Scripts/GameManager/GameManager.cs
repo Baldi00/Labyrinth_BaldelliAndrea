@@ -3,22 +3,24 @@ using DBGA.Common;
 using DBGA.EventSystem;
 using DBGA.MapGeneration;
 using DBGA.MazePlayer;
+using DBGA.ThroughScenes;
 using DBGA.Tiles;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace DBGA.GameManager
 {
     [DisallowMultipleComponent]
     public class GameManager : MonoBehaviour, IGameEventsListener
     {
+        private const int PRECOMPUTED_MAP_SIZE = 20;
+
         [Header("Map generation")]
         [SerializeField]
         private GameObject precomputedMap;
         [SerializeField]
         private bool generateRandomMap;
-        [SerializeField]
-        private int gridSize;
         [SerializeField]
         private MapGenerator mapGenerator;
 
@@ -32,14 +34,15 @@ namespace DBGA.GameManager
         [SerializeField]
         private float inGameCameraSize = 5.4f;
 
-        [Header("Map elements")]
-        [SerializeField]
-        private MapElementsList mapElementsList;
+        [Header("Fog")]
         [SerializeField]
         private GameObject fogElementPrefab;
 
+        private int gridSize;
         private GameObject mapContainer;
         private Tile[][] grid;
+
+        private MapElementsList mapElementsList;
 
         private Fog[][] fogGrid;
         private GameObject fogContainer;
@@ -56,6 +59,9 @@ namespace DBGA.GameManager
 
         void Awake()
         {
+            ThroughScenesParameters.mapGenerationError = false;
+            gridSize = generateRandomMap ? ThroughScenesParameters.gridSize : PRECOMPUTED_MAP_SIZE;
+            mapElementsList = ThroughScenesParameters.mapElementsList;
             gameEventsManager = GameEventsManager.Instance;
         }
 
@@ -241,9 +247,18 @@ namespace DBGA.GameManager
         /// <returns>A random position of an empty tile on the grid</returns>
         private Vector2Int GetRandomPositionOnEmptyTile()
         {
+            int iterations = 0;
             Vector2Int randomPosition;
             do
             {
+                iterations++;
+                if(iterations > 1000)
+                {
+                    ThroughScenesParameters.mapGenerationError = true;
+                    SceneManager.LoadScene("MainMenuScene");
+                    throw new System.InvalidOperationException("Trying to create map with wrong parameters");
+                }
+
                 randomPosition =
                     new Vector2Int(UnityEngine.Random.Range(0, gridSize), UnityEngine.Random.Range(0, gridSize));
             } while (!IsEmptyTile(randomPosition));

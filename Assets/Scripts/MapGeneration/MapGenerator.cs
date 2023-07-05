@@ -18,10 +18,6 @@ namespace DBGA.MapGeneration
         }
 
         [SerializeField]
-        private TilesList noDoubleLTilesList;
-        [SerializeField]
-        private TilesList completeTilesList;
-        [SerializeField]
         private GameObject voidTilePrefab;
         [SerializeField]
         [Range(0.01f, 1f)]
@@ -41,10 +37,7 @@ namespace DBGA.MapGeneration
         public IEnumerator GenerateMap(int gridSize, Transform parent, System.Action<Tile[][]> onMapGenerated)
         {
             bool animateGeneration = ThroughScenesParameters.animateGeneration;
-            if (ThroughScenesParameters.useCompleteTilesListForGeneration)
-                currentTilesList = completeTilesList;
-            else
-                currentTilesList = noDoubleLTilesList;
+            currentTilesList = ThroughScenesParameters.tilesList;
 
             this.gridSize = gridSize;
 
