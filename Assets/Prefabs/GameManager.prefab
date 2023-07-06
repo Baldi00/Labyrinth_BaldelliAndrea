@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3028052299802598069
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3028052299802598067}
+  - component: {fileID: 3028052299802598064}
+  - component: {fileID: 3028052299802598065}
+  - component: {fileID: 3028052299802598062}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3028052299802598067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3028052299802598069}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3028052299802598064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3028052299802598069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fa7553eea8829a4c80423afb294efdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputedMap: {fileID: 0}
+  generateRandomMap: 1
+  mapGenerator: {fileID: 3028052299802598062}
+  playerPrefab: {fileID: 8862266604122522133, guid: 16621445116d9bd46b53314e36b7ba59,
+    type: 3}
+  mainCamera: {fileID: 0}
+  inGameCameraSize: 5.4
+  fogElementPrefab: {fileID: 7774140918785996905, guid: ce4126dbc079ff540bd5d795b09bf5c0,
+    type: 3}
+--- !u!114 &3028052299802598065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3028052299802598069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f158c61b0acf6314b94f7eebaa750e46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementInputs:
+    moveUp: 119
+    moveDown: 115
+    moveLeft: 97
+    moveRight: 100
+  arrowShootingInputs:
+    shootUp: 105
+    shootDown: 107
+    shootLeft: 106
+    shootRight: 108
+  toggleFogVisibilityKey: 116
+--- !u!114 &3028052299802598062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3028052299802598069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe986a58082e86645a46c30b881a4a1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voidTilePrefab: {fileID: 1798332517880667212, guid: a11b9c92053db224394e038a566ec9f3,
+    type: 3}
+  generationAnimationTime: 0.01
