@@ -46,6 +46,43 @@ namespace DBGA.UI
 
         void Awake()
         {
+            SetUpMainMenuUI();
+        }
+
+        /// <summary>
+        /// Sets custom map elements parameters then loads the precomputed maze scene
+        /// </summary>
+        public void LoadPrecomputedMazeScene()
+        {
+            SetMapElementsInThroughSceneParameters();
+            SceneManager.LoadScene("PrecomputedMazeScene");
+        }
+
+        /// <summary>
+        /// Sets custom tiles weights and map elements parameters then loads the maze generation scene
+        /// </summary>
+        public void LoadGeneratedMazeScene()
+        {
+            SetTilesItemListInThroughSceneParameters();
+            SetMapElementsInThroughSceneParameters();
+            ThroughScenesParameters.GridSize = Mathf.Clamp(int.Parse(gridSizeInputField.text), 5, 50);
+            ThroughScenesParameters.AnimateGeneration = animateGenerationToggle.isOn;
+            SceneManager.LoadScene("GeneratedMazeScene");
+        }
+
+        /// <summary>
+        /// Quits the game
+        /// </summary>
+        public void QuitGame()
+        {
+            Application.Quit();
+        }
+
+        /// <summary>
+        /// Initializes the main menu UI with default values for grid size, tiles probabilities and map elements
+        /// </summary>
+        private void SetUpMainMenuUI()
+        {
             if (ThroughScenesParameters.MapGenerationError)
                 mapGenerationError.SetActive(true);
 
@@ -63,21 +100,12 @@ namespace DBGA.UI
                 .Find(element => element.MapElementType == MapElementType.WELL).Count.ToString();
         }
 
-        public void LoadPrecomputedMazeScene()
-        {
-            SetMapElementsInThroughSceneParameters();
-            SceneManager.LoadScene("PrecomputedMazeScene");
-        }
-
-        public void LoadGeneratedMazeScene()
-        {
-            SetTilesItemListInThroughSceneParameters();
-            SetMapElementsInThroughSceneParameters();
-            ThroughScenesParameters.GridSize = Mathf.Clamp(int.Parse(gridSizeInputField.text), 5, 50);
-            ThroughScenesParameters.AnimateGeneration = animateGenerationToggle.isOn;
-            SceneManager.LoadScene("GeneratedMazeScene");
-        }
-
+        /// <summary>
+        /// Returns a list of tiles from the available ones that contains or not contains the given strings in the name
+        /// </summary>
+        /// <param name="contains">String contained in the name of the tiles</param>
+        /// <param name="notContains">String not contained in the name of the tiles</param>
+        /// <returns>A list of tiles from the available ones that contains or not contains the given strings in the name</returns>
         private List<TileListItem> GetListOfTiles(string contains, string notContains = "###")
         {
             return initialTilesList.AvailableTiles
@@ -87,6 +115,9 @@ namespace DBGA.UI
                 .ToList<TileListItem>();
         }
 
+        /// <summary>
+        /// Sets the tiles probabilities in the through scenes parameters
+        /// </summary>
         private void SetTilesItemListInThroughSceneParameters()
         {
             List<TileListItem> xTilesList = GetListOfTiles("X_Tile");
@@ -114,6 +145,9 @@ namespace DBGA.UI
             ThroughScenesParameters.TilesList = tilesList;
         }
 
+        /// <summary>
+        /// Sets the map elements count in the through scenes parameters
+        /// </summary>
         private void SetMapElementsInThroughSceneParameters()
         {
             MapElementsList mapElementsList = ScriptableObject.CreateInstance<MapElementsList>();
