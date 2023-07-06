@@ -13,10 +13,10 @@ namespace DBGA.Editor
     {
         private const string templatePath = "Assets/Scripts/Editor/NewGameEventTemplate.txt";
         private const string helpBoxText = "Put each parameter on a single line with its type. For example:\n\n" +
-                "Vector3 position\n" +
-                "Player player\n" +
-                "int ammoCount\n" +
-                "float stamina";
+                "Vector3 Position\n" +
+                "Player Player\n" +
+                "int AmmoCount\n" +
+                "float Stamina";
 
         private string eventName = "NewGameEvent";
         private string parametersGUI = "";
@@ -31,7 +31,7 @@ namespace DBGA.Editor
 
         void OnGUI()
         {
-            newEventPath = $"Assets/Scripts/EventSystem/Events/{eventName}.cs";
+            newEventPath = $"Assets/Scripts/EventSystem/CustomEvents/{eventName}.cs";
 
             bool wasGUIEnabled = GUI.enabled;
             GUI.enabled = false;
@@ -53,13 +53,15 @@ namespace DBGA.Editor
             TextAsset template = AssetDatabase.LoadAssetAtPath<TextAsset>(templatePath);
 
             string[] parameters = parametersGUI.Split("\n");
-            parameters = parameters.Select<string, string>(s => "public " + s.Replace(";", "") + ";").ToArray<string>();
+            parameters = parameters
+                .Select<string, string>(s => "public " + s.Replace(";", "") + " { set; get; }")
+                .ToArray<string>();
 
             StringBuilder parametersFinal = new();
             if (parametersGUI != "")
             {
                 foreach (string p in parameters)
-                    parametersFinal.Append(p + "\n    ");
+                    parametersFinal.Append(p + "\n        ");
 
                 parametersFinal.Remove(parametersFinal.ToString().LastIndexOf("\n"), 5);
             }

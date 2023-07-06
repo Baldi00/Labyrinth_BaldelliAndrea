@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DBGA.EventSystem
 {
-    public class #EVENTNAME# : GameEvent
+    public class #EVENTNAME# : IGameEvent
     {
         #EVENTPARAMS#
     }
