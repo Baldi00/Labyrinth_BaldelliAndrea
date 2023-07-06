@@ -6,7 +6,9 @@ using UnityEngine;
 
 namespace DBGA.Editor
 {
-    [DisallowMultipleComponent]
+    /// <summary>
+    /// Editor utility window to automatically create a Game Event
+    /// </summary>
     public class CreateGameEventWindow : EditorWindow
     {
         private const string templatePath = "Assets/Scripts/Editor/NewGameEventTemplate.txt";

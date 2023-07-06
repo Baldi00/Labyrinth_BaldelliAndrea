@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DBGA.Common
 {
-    public class Utils
+    public static class Utils
     {
         /// <summary>
         /// Returns the next position from the current position in the given direction

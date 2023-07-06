@@ -11,6 +11,10 @@ namespace DBGA.Common
 
     public static class DirectionMethods
     {
+        /// <summary>
+        /// Returns the opposite direction of this direction (e.g. the opposite direction of Up is Down)
+        /// </summary>
+        /// <returns>The opposite direction of this direction</returns>
         public static Direction GetOppositeDirection(this Direction direction)
         {
             return direction switch

@@ -85,7 +85,7 @@ namespace DBGA.GameManager
                 currentPlayerIndex = 0;
                 currentPlayer = players[currentPlayerIndex];
                 mainCamera.SetPlayerTransform(currentPlayer.transform);
-                mainCamera.SetSize(inGameCameraSize);
+                mainCamera.SetOrthographicCameraSize(inGameCameraSize);
             });
         }
 
@@ -187,7 +187,7 @@ namespace DBGA.GameManager
         /// <see cref="IsEmptyTile"/>
         private void PlaceMapElements()
         {
-            foreach (MapElementsItem mapElementsItem in mapElementsList.mapElements)
+            foreach (MapElementsListItem mapElementsItem in mapElementsList.mapElements)
                 for (int i = 0; i < mapElementsItem.count; i++)
                 {
                     Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
@@ -196,15 +196,15 @@ namespace DBGA.GameManager
 
                     switch (mapElementsItem.mapElement)
                     {
-                        case MapElement.MONSTER:
+                        case MapElementType.MONSTER:
                             placementTile.HasMonster = true;
                             monsterTile = placementTile;
                             monster = mapElement;
                             break;
-                        case MapElement.TELEPORT:
+                        case MapElementType.TELEPORT:
                             placementTile.HasTeleport = true;
                             break;
-                        case MapElement.WELL:
+                        case MapElementType.WELL:
                             placementTile.HasWell = true;
                             break;
                     }

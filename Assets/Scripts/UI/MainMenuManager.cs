@@ -58,9 +58,9 @@ namespace DBGA.UI
             doubleLTilesProbability.text = GetListOfTiles("Double_L_Tile")[0].probabilityWeight.ToString();
 
             teleportsInputField.text = initialMapElementsList.mapElements
-                .Find(element => element.mapElement == MapElement.TELEPORT).count.ToString();
+                .Find(element => element.mapElement == MapElementType.TELEPORT).count.ToString();
             wellsInputField.text = initialMapElementsList.mapElements
-                .Find(element => element.mapElement == MapElement.WELL).count.ToString();
+                .Find(element => element.mapElement == MapElementType.WELL).count.ToString();
         }
 
         public void LoadPrecomputedMazeScene()
@@ -117,27 +117,27 @@ namespace DBGA.UI
         private void SetMapElementsInThroughSceneParameters()
         {
             MapElementsList mapElementsList = ScriptableObject.CreateInstance<MapElementsList>();
-            mapElementsList.mapElements = new List<MapElementsItem>()
+            mapElementsList.mapElements = new List<MapElementsListItem>()
             {
-                new MapElementsItem()
+                new MapElementsListItem()
                 {
-                    mapElement = MapElement.MONSTER,
+                    mapElement = MapElementType.MONSTER,
                     prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElement.MONSTER).prefab,
+                        .Find(element => element.mapElement == MapElementType.MONSTER).prefab,
                     count = 1
                 },
-                new MapElementsItem()
+                new MapElementsListItem()
                 {
-                    mapElement = MapElement.TELEPORT,
+                    mapElement = MapElementType.TELEPORT,
                     prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElement.TELEPORT).prefab,
+                        .Find(element => element.mapElement == MapElementType.TELEPORT).prefab,
                     count = Mathf.Max(0, int.Parse(teleportsInputField.text))
                 },
-                new MapElementsItem()
+                new MapElementsListItem()
                 {
-                    mapElement = MapElement.WELL,
+                    mapElement = MapElementType.WELL,
                     prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElement.WELL).prefab,
+                        .Find(element => element.mapElement == MapElementType.WELL).prefab,
                     count = Mathf.Max(0, int.Parse(wellsInputField.text))
                 },
             };
