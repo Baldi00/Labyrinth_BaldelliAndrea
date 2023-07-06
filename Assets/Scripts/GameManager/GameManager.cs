@@ -51,6 +51,7 @@ namespace DBGA.GameManager
         private List<Player> players;
         private Player currentPlayer;
         private int currentPlayerIndex;
+        private Dictionary<int, Color> playerColors;
 
         private GameObject monster;
         private Tile monsterTile;
@@ -67,6 +68,7 @@ namespace DBGA.GameManager
             mapElementsList = ThroughScenesParameters.mapElementsList;
             gameEventsManager = GameEventsManager.Instance;
             players = new List<Player>();
+            playerColors = new Dictionary<int, Color>();
         }
 
         void Start()
@@ -150,6 +152,13 @@ namespace DBGA.GameManager
             placedPlayer.PlayerNumber = playerNumber;
             playerGameObject.GetComponent<PlayerEnterTriggerDetector>().PlayerNumber = playerNumber;
             players.Add(placedPlayer);
+
+            Color playerColor = Color.HSVToRGB(Random.Range(0f, 1f), 1f, 1f);
+            if (playerNumber == 0)
+                playerColor = Color.blue;
+            placedPlayer.GetComponentInChildren<Renderer>().material.color = playerColor;
+            playerColors.Add(playerNumber, playerColor);
+
             gameEventsManager.DispatchGameEvent(new PlayerAddedEvent() { playerNumber = placedPlayer.PlayerNumber });
         }
 
@@ -454,9 +463,10 @@ namespace DBGA.GameManager
             currentPlayer.IgnoreInputs = false;
             gameEventsManager
                 .DispatchGameEvent(new NextPlayerStartTurnEvent()
-                { 
+                {
                     nextPlayerNumber = currentPlayerIndex,
-                    currentPlayerArrows = currentPlayer.CurrentArrowsCount
+                    currentPlayerArrows = currentPlayer.CurrentArrowsCount,
+                    playerColor = playerColors[currentPlayerIndex]
                 });
         }
 

@@ -62,6 +62,7 @@ namespace DBGA.UI
         {
             AddGameEventsListeners();
             playersUIStates = new Dictionary<int, CurrentPlayerUIInfo>();
+            playerNumber.color = Color.blue;
         }
 
         public void ReceiveGameEvent(GameEvent gameEvent)
@@ -110,6 +111,7 @@ namespace DBGA.UI
                 case NextPlayerStartTurnEvent nextPlayerStartTurnEvent:
                     currentPlayerNumber = nextPlayerStartTurnEvent.nextPlayerNumber;
                     playerNumber.text = $"Player {currentPlayerNumber + 1}";
+                    playerNumber.color = nextPlayerStartTurnEvent.playerColor;
                     arrowCount.text = $"Arrows: {nextPlayerStartTurnEvent.currentPlayerArrows}";
                     UpdateSpecialUI();
                     break;
