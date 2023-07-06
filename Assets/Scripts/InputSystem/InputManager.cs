@@ -8,7 +8,7 @@ namespace DBGA.InputSystem
     public class InputManager : MonoBehaviour
     {
         [System.Serializable]
-        public struct MovementInputKeys
+        private struct MovementInputKeys
         {
             public KeyCode moveUp;
             public KeyCode moveDown;
@@ -17,7 +17,7 @@ namespace DBGA.InputSystem
         }
 
         [System.Serializable]
-        public struct ArrowShootingInputKeys
+        private struct ArrowShootingInputKeys
         {
             public KeyCode shootUp;
             public KeyCode shootDown;
@@ -61,6 +61,10 @@ namespace DBGA.InputSystem
                 gameEventsManager.DispatchGameEvent(new InputToggleFogVisibilityEvent());
         }
 
+        /// <summary>
+        /// Returns the current player input movement direction
+        /// </summary>
+        /// <returns>The movement direction the player gave as input, None if player didn't input anything</returns>
         private Direction GetCurrentInputMovementDirection()
         {
             if (Input.GetKeyDown(movementInputs.moveUp))
@@ -75,6 +79,10 @@ namespace DBGA.InputSystem
             return Direction.None;
         }
 
+        /// <summary>
+        /// Returns the current player input arrow shooting direction
+        /// </summary>
+        /// <returns>The arrow shooting direction the player gave as input, None if player didn't input anything</returns>
         private Direction GetCurrentArrowShotDirection()
         {
             if (Input.GetKeyDown(arrowShootingInputs.shootUp))

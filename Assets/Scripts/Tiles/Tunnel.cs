@@ -30,6 +30,11 @@ namespace DBGA.Tiles
             gameEventsManager = GameEventsManager.Instance;
         }
 
+        /// <summary>
+        /// Adds an adjacent tiles to this tunnel in the given direction
+        /// </summary>
+        /// <param name="direction">The direction of the adjacent tile</param>
+        /// <param name="tile">The adjacent tile to add</param>
         public void AddAdjacentTile(Direction direction, Tile tile)
         {
             adjacentTiles.Add(new AdjacentTile() { direction = direction, tile = tile });

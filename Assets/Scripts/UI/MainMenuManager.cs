@@ -46,7 +46,7 @@ namespace DBGA.UI
 
         void Awake()
         {
-            if (ThroughScenesParameters.mapGenerationError)
+            if (ThroughScenesParameters.MapGenerationError)
                 mapGenerationError.SetActive(true);
 
             gridSizeInputField.text = "20";
@@ -73,8 +73,8 @@ namespace DBGA.UI
         {
             SetTilesItemListInThroughSceneParameters();
             SetMapElementsInThroughSceneParameters();
-            ThroughScenesParameters.gridSize = Mathf.Clamp(int.Parse(gridSizeInputField.text), 5, 50);
-            ThroughScenesParameters.animateGeneration = animateGenerationToggle.isOn;
+            ThroughScenesParameters.GridSize = Mathf.Clamp(int.Parse(gridSizeInputField.text), 5, 50);
+            ThroughScenesParameters.AnimateGeneration = animateGenerationToggle.isOn;
             SceneManager.LoadScene("GeneratedMazeScene");
         }
 
@@ -111,7 +111,7 @@ namespace DBGA.UI
             TilesList tilesList = ScriptableObject.CreateInstance<TilesList>();
             tilesList.availableTiles = tilesListItems;
 
-            ThroughScenesParameters.tilesList = tilesList;
+            ThroughScenesParameters.TilesList = tilesList;
         }
 
         private void SetMapElementsInThroughSceneParameters()
@@ -142,7 +142,7 @@ namespace DBGA.UI
                 },
             };
 
-            ThroughScenesParameters.mapElementsList = mapElementsList;
+            ThroughScenesParameters.MapElementsList = mapElementsList;
         }
     }
 }

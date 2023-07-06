@@ -26,6 +26,7 @@ namespace DBGA.Tiles
 
                 playerExplored = value;
             }
+            get => playerExplored;
         }
 
         void Awake()
@@ -34,6 +35,9 @@ namespace DBGA.Tiles
             isVisible = true;
         }
 
+        /// <summary>
+        /// Hides the fog with an animation
+        /// </summary>
         public void Hide()
         {
             if (playerExplored || !isVisible)
@@ -46,6 +50,9 @@ namespace DBGA.Tiles
             animationCoroutine = StartCoroutine(AnimateFog(1, 0));
         }
 
+        /// <summary>
+        /// Shows the fog with an animation
+        /// </summary>
         public void Show()
         {
             if (playerExplored || isVisible)
@@ -58,6 +65,11 @@ namespace DBGA.Tiles
             animationCoroutine = StartCoroutine(AnimateFog(0, 1));
         }
 
+        /// <summary>
+        /// Animate the fog for the set duration from the given start opacity to the given end opacity
+        /// </summary>
+        /// <param name="startOpacity">The starting opacity of the animation</param>
+        /// <param name="endOpacity">The end opacity of the animation</param>
         private IEnumerator AnimateFog(float startOpacity, float endOpacity)
         {
             float timer = 0;

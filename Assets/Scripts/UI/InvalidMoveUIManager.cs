@@ -23,6 +23,9 @@ namespace DBGA.UI
             waitThanHideMessageCoroutine = StartCoroutine(WaitThenHideMessage());
         }
 
+        /// <summary>
+        /// Waits for the message duration then hides it
+        /// </summary>
         private IEnumerator WaitThenHideMessage()
         {
             yield return new WaitForSecondsRealtime(messageDuration);

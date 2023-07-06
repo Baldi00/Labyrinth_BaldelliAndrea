@@ -36,8 +36,8 @@ namespace DBGA.MapGeneration
         /// <param name="onMapGenerated">Callback called at the end of the generation</param>
         public IEnumerator GenerateMap(int gridSize, Transform parent, System.Action<Tile[][]> onMapGenerated)
         {
-            bool animateGeneration = ThroughScenesParameters.animateGeneration;
-            currentTilesList = ThroughScenesParameters.tilesList;
+            bool animateGeneration = ThroughScenesParameters.AnimateGeneration;
+            currentTilesList = ThroughScenesParameters.TilesList;
 
             this.gridSize = gridSize;
 

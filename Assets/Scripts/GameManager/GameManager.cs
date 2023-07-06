@@ -65,9 +65,9 @@ namespace DBGA.GameManager
 
         void Awake()
         {
-            ThroughScenesParameters.mapGenerationError = false;
-            gridSize = generateRandomMap ? ThroughScenesParameters.gridSize : PRECOMPUTED_MAP_SIZE;
-            mapElementsList = ThroughScenesParameters.mapElementsList;
+            ThroughScenesParameters.MapGenerationError = false;
+            gridSize = generateRandomMap ? ThroughScenesParameters.GridSize : PRECOMPUTED_MAP_SIZE;
+            mapElementsList = ThroughScenesParameters.MapElementsList;
             gameEventsManager = GameEventsManager.Instance;
             players = new List<Player>();
             playerColors = new Dictionary<int, Color>();
@@ -298,7 +298,7 @@ namespace DBGA.GameManager
                 iterations++;
                 if (iterations > 1000)
                 {
-                    ThroughScenesParameters.mapGenerationError = true;
+                    ThroughScenesParameters.MapGenerationError = true;
                     SceneManager.LoadScene("MainMenuScene");
                     throw new NoEmptyTilesRemainingException("No more empty tiles on the map");
                 }
