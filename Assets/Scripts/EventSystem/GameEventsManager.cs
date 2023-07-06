@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace DBGA.EventSystem
 {
+    /// <summary>
+    /// Generic singleton game events manager
+    /// </summary>
     public class GameEventsManager
     {
         private static GameEventsManager _instance = null;
@@ -11,9 +14,7 @@ namespace DBGA.EventSystem
         {
             get
             {
-                if (_instance == null)
-                    _instance = new GameEventsManager();
-
+                _instance ??= new GameEventsManager();
                 return _instance;
             }
         }

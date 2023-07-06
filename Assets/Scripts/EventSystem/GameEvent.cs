@@ -15,13 +15,13 @@ namespace DBGA.EventSystem
     /// }
     /// 
     /// To send the event call GameEventsManager.Instance.DispatchGameEvent(new MyCustomGameEvent(){ customParam = ... });
-    /// (If the event is sent very frequently consider creating only one event and send the same event 
+    /// (If the event is sent very frequently consider caching the event and send the same event 
     /// with different parameters each time)
     /// 
     /// To receive the event implement IGameEventsListener in your class and register your class
     /// as a listener for that type of event.
     /// e.g.
-    /// void Start()
+    /// void Awake()
     /// { 
     ///     GameEventsManager.Instance.AddGameEventListener(this, typeof(MyCustomGameEvent));
     /// }

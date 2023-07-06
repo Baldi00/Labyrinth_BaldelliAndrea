@@ -108,11 +108,11 @@ namespace DBGA.UI
                 case InvalidMoveEvent:
                     invalidMove.Show();
                     break;
-                case NextPlayerStartTurnEvent nextPlayerStartTurnEvent:
-                    currentPlayerNumber = nextPlayerStartTurnEvent.nextPlayerNumber;
+                case PlayerStartedTurnEvent nextPlayerStartTurnEvent:
+                    currentPlayerNumber = nextPlayerStartTurnEvent.playerNumber;
                     playerNumber.text = $"Player {currentPlayerNumber + 1}";
                     playerNumber.color = nextPlayerStartTurnEvent.playerColor;
-                    arrowCount.text = $"Arrows: {nextPlayerStartTurnEvent.currentPlayerArrows}";
+                    arrowCount.text = $"Arrows: {nextPlayerStartTurnEvent.playerArrowsCount}";
                     UpdateSpecialUI();
                     break;
             }
@@ -136,7 +136,7 @@ namespace DBGA.UI
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InvalidMoveEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(NextPlayerStartTurnEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerStartedTurnEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerAddedEvent));
         }
 

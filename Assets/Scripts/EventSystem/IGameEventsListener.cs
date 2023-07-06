@@ -8,7 +8,7 @@ namespace DBGA.EventSystem
     /// To receive an event implement IGameEventsListener in your class and register your class
     /// as a listener for that type of event.
     /// e.g.
-    /// void Start()
+    /// void Awake()
     /// { 
     ///     GameEventsManager.Instance.AddGameEventListener(this, typeof(MyCustomGameEvent));
     /// }

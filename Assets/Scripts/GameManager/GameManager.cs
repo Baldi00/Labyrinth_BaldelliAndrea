@@ -462,10 +462,10 @@ namespace DBGA.GameManager
             mainCamera.SetPlayerTransform(currentPlayer.transform);
             currentPlayer.IgnoreInputs = false;
             gameEventsManager
-                .DispatchGameEvent(new NextPlayerStartTurnEvent()
+                .DispatchGameEvent(new PlayerStartedTurnEvent()
                 {
-                    nextPlayerNumber = currentPlayerIndex,
-                    currentPlayerArrows = currentPlayer.CurrentArrowsCount,
+                    playerNumber = currentPlayerIndex,
+                    playerArrowsCount = currentPlayer.CurrentArrowsCount,
                     playerColor = playerColors[currentPlayerIndex]
                 });
         }
