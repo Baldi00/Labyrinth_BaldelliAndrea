@@ -1,4 +1,6 @@
 using DBGA.EventSystem;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,6 +10,13 @@ namespace DBGA.UI
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour, IGameEventsListener
     {
+        private class CurrentPlayerUIInfo
+        {
+            public bool bloodUiOn;
+            public bool windUiOn;
+            public bool moldUiOn;
+        }
+
         [Header("Win/Lose UI")]
         [SerializeField]
         private GameObject youWinUi;
@@ -16,6 +25,8 @@ namespace DBGA.UI
         [SerializeField]
         private Text youLoseDescription;
         [SerializeField]
+        private Text anotherPlayerLost;
+        [SerializeField]
         private string youLoseMonsterDescription;
         [SerializeField]
         private string youLoseWellDescription;
@@ -23,6 +34,8 @@ namespace DBGA.UI
         private string youLoseNoArrowDescription;
         [SerializeField]
         private string youLoseArrowHitPlayerDescription;
+        [SerializeField]
+        private string anotherPlayerWonDescription;
 
         [Header("Special UI")]
         [SerializeField]
@@ -32,7 +45,9 @@ namespace DBGA.UI
         [SerializeField]
         private GameObject moldUi;
 
-        [Header("Arrows count")]
+        [Header("Player info")]
+        [SerializeField]
+        private Text playerNumber;
         [SerializeField]
         private Text arrowCount;
 
@@ -40,42 +55,48 @@ namespace DBGA.UI
         [SerializeField]
         private InvalidMoveUIManager invalidMove;
 
-        void Start()
+        private int currentPlayerNumber;
+        private Dictionary<int, CurrentPlayerUIInfo> playersUIStates;
+
+        void Awake()
         {
             AddGameEventsListeners();
+            playersUIStates = new Dictionary<int, CurrentPlayerUIInfo>();
         }
 
         public void ReceiveGameEvent(GameEvent gameEvent)
         {
             switch (gameEvent)
             {
+                case PlayerAddedEvent playerAddedEvent:
+                    AddCurrentPlayerNumberUIInfoState(playerAddedEvent.playerNumber);
+                    break;
                 case MonsterTileAdjacentEvent monsterTileAdjacentEvent:
-                    bloodUi.SetActive(monsterTileAdjacentEvent.isPlayerInside);
+                    playersUIStates[monsterTileAdjacentEvent.playerNumber].bloodUiOn = monsterTileAdjacentEvent.isPlayerInside;
+                    UpdateSpecialUI();
                     break;
                 case WellTileAdjacentEvent wellTileAdjacentEvent:
-                    moldUi.SetActive(wellTileAdjacentEvent.isPlayerInside);
+                    playersUIStates[wellTileAdjacentEvent.playerNumber].moldUiOn = wellTileAdjacentEvent.isPlayerInside;
+                    UpdateSpecialUI();
                     break;
                 case TeleportTileAdjacentEvent teleportTileAdjacentEvent:
-                    windUi.SetActive(teleportTileAdjacentEvent.isPlayerInside);
+                    playersUIStates[teleportTileAdjacentEvent.playerNumber].windUiOn = teleportTileAdjacentEvent.isPlayerInside;
+                    UpdateSpecialUI();
                     break;
-                case EnteredWellTileEvent:
-                    youLoseDescription.text = youLoseWellDescription;
-                    youLoseUi.SetActive(true);
+                case EnteredWellTileEvent enteredWellTileEvent:
+                    HandleLoseEvents(enteredWellTileEvent.playerNumber, youLoseWellDescription);
                     break;
-                case EnteredMonsterTileEvent:
-                    youLoseDescription.text = youLoseMonsterDescription;
-                    youLoseUi.SetActive(true);
+                case EnteredMonsterTileEvent enteredMonsterTileEvent:
+                    HandleLoseEvents(enteredMonsterTileEvent.playerNumber, youLoseMonsterDescription);
                     break;
-                case PlayerLostForNoArrowRemainingEvent:
-                    youLoseDescription.text = youLoseNoArrowDescription;
-                    youLoseUi.SetActive(true);
+                case PlayerLostForNoArrowRemainingEvent playerLostForNoArrowRemainingEvent:
+                    HandleLoseEvents(playerLostForNoArrowRemainingEvent.playerNumber, youLoseNoArrowDescription);
                     break;
-                case ArrowHitPlayerEvent:
-                    youLoseDescription.text = youLoseArrowHitPlayerDescription;
-                    youLoseUi.SetActive(true);
+                case ArrowHitPlayerEvent arrowHitPlayerEvent:
+                    HandleArrowHitPlayerEvent(arrowHitPlayerEvent);
                     break;
-                case ArrowCollidedWithMonsterEvent:
-                    youWinUi.SetActive(true);
+                case ArrowCollidedWithMonsterEvent arrowCollidedWithMonsterEvent:
+                    HandleWinEvent(arrowCollidedWithMonsterEvent.playerNumber);
                     break;
                 case ArrowShotEvent arrowShotEvent:
                     arrowCount.text = $"Arrows: {arrowShotEvent.remainingArrows}";
@@ -85,6 +106,12 @@ namespace DBGA.UI
                     break;
                 case InvalidMoveEvent:
                     invalidMove.Show();
+                    break;
+                case NextPlayerStartTurnEvent nextPlayerStartTurnEvent:
+                    currentPlayerNumber = nextPlayerStartTurnEvent.nextPlayerNumber;
+                    playerNumber.text = $"Player {currentPlayerNumber + 1}";
+                    arrowCount.text = $"Arrows: {nextPlayerStartTurnEvent.currentPlayerArrows}";
+                    UpdateSpecialUI();
                     break;
             }
         }
@@ -107,6 +134,62 @@ namespace DBGA.UI
             GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(InvalidMoveEvent));
             GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(NextPlayerStartTurnEvent));
+            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerAddedEvent));
+        }
+
+        private void AddCurrentPlayerNumberUIInfoState(int playerNumber)
+        {
+            if (!playersUIStates.ContainsKey(playerNumber))
+                playersUIStates.Add(playerNumber,
+                    new CurrentPlayerUIInfo() { bloodUiOn = false, windUiOn = false, moldUiOn = false });
+        }
+
+        private void UpdateSpecialUI()
+        {
+            bloodUi.SetActive(playersUIStates[currentPlayerNumber].bloodUiOn);
+            moldUi.SetActive(playersUIStates[currentPlayerNumber].moldUiOn);
+            windUi.SetActive(playersUIStates[currentPlayerNumber].windUiOn);
+        }
+
+        private void HandleLoseEvents(int playerNumber, string loseDescription)
+        {
+            if (playerNumber == 0)
+            {
+                youLoseDescription.text = $"Player 1 {loseDescription}";
+                youLoseUi.SetActive(true);
+            }
+            else
+            {
+                anotherPlayerLost.text = $"Player {currentPlayerNumber + 1} {loseDescription}";
+                anotherPlayerLost.enabled = true;
+            }
+        }
+
+        private void HandleWinEvent(int playerNumber)
+        {
+            if (playerNumber == 0)
+                youWinUi.SetActive(true);
+            else
+            {
+                youLoseDescription.text = $"Player {currentPlayerNumber + 1} {anotherPlayerWonDescription}";
+                youLoseUi.SetActive(true);
+            }
+        }
+
+        private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
+        {
+            if (arrowHitPlayerEvent.hitPlayerNumber == 0)
+            {
+                youLoseDescription.text = $"Player 1 {youLoseArrowHitPlayerDescription}";
+                youLoseUi.SetActive(true);
+            }
+            else
+            {
+                anotherPlayerLost.text =
+                    $"Player {arrowHitPlayerEvent.hitPlayerNumber + 1} {youLoseArrowHitPlayerDescription}";
+                anotherPlayerLost.enabled = true;
+            }
         }
     }
 }

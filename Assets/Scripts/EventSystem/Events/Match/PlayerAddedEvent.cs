@@ -1,6 +1,8 @@
+using UnityEngine;
+
 namespace DBGA.EventSystem
 {
-    public class EnteredWellTileEvent : GameEvent
+    public class PlayerAddedEvent : GameEvent
     {
         public int playerNumber;
     }

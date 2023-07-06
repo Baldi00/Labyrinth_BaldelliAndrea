@@ -39,9 +39,19 @@ namespace DBGA.MazePlayer
         private Coroutine animateMovementToNextTileCoroutine;
         private Coroutine animateMovementToNextTilesCoroutine;
 
-        public Vector2Int PositionOnGrid { get => positionOnGrid; }
+        public int PlayerNumber { set; get; }
+        public bool HasPlayerLost { set; get; }
         public bool IgnoreInputs { set; get; }
         public int CurrentArrowsCount { get => currentArrowsCount; }
+        public Vector2Int PositionOnGrid
+        {
+            set
+            {
+                positionOnGrid = value;
+                gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = positionOnGrid });
+            }
+            get => positionOnGrid;
+        }
 
         void Awake()
         {
@@ -52,16 +62,6 @@ namespace DBGA.MazePlayer
         void Start()
         {
             gameEventsManager.DispatchGameEvent(new InitializeArrowCountEvent() { remainingArrows = currentArrowsCount });
-        }
-
-        /// <summary>
-        /// Sets the position of the player on the grid
-        /// </summary>
-        /// <param name="positionOnGrid">The position on the grid</param>
-        public void SetPositionOnGrid(Vector2Int positionOnGrid)
-        {
-            this.positionOnGrid = positionOnGrid;
-            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = positionOnGrid });
         }
 
         /// <summary>
@@ -131,6 +131,7 @@ namespace DBGA.MazePlayer
                 .GetComponent<Arrow>();
 
             arrow.SetArrowDirection(shotDirection);
+            arrow.OwnerPlayerNumber = PlayerNumber;
             gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
 
             return true;
@@ -172,7 +173,7 @@ namespace DBGA.MazePlayer
             if (isInMoveAnimation)
                 return MoveOutcome.FAIL_INSIDE_ANIMATION;
 
-            SetPositionOnGrid(nextPosition);
+            PositionOnGrid = nextPosition;
             animateMovementToNextTileCoroutine =
                 StartCoroutine(AnimateMovementToNextTile(nextPosition, animationDuration));
 
@@ -191,7 +192,7 @@ namespace DBGA.MazePlayer
             if (isInMoveAnimation)
                 return MoveOutcome.FAIL_INSIDE_ANIMATION;
 
-            SetPositionOnGrid(finalPosition);
+            PositionOnGrid = finalPosition;
             animateMovementToNextTilesCoroutine =
                 StartCoroutine(AnimateMovementToNextTiles(crossingPositions, animationDuration));
             return MoveOutcome.SUCCESS;

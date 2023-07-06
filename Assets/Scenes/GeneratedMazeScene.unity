@@ -440,13 +440,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   precomputedMap: {fileID: 0}
   generateRandomMap: 1
-  gridSize: 20
   mapGenerator: {fileID: 1721960304}
   playerPrefab: {fileID: 8862266604122522133, guid: 16621445116d9bd46b53314e36b7ba59,
     type: 3}
   mainCamera: {fileID: 330585548}
   inGameCameraSize: 5.4
-  mapElementsList: {fileID: 11400000, guid: 6be0b683e67814847bcafd9bd5544800, type: 2}
   fogElementPrefab: {fileID: 7774140918785996905, guid: ce4126dbc079ff540bd5d795b09bf5c0,
     type: 3}
 --- !u!114 &1721960303
@@ -484,8 +482,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe986a58082e86645a46c30b881a4a1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  noDoubleLTilesList: {fileID: 11400000, guid: 045c41392ddb16a44ba894bcab72ae6c, type: 2}
-  completeTilesList: {fileID: 11400000, guid: 4140f60ecfa785f4c8e8d640821c0da0, type: 2}
   voidTilePrefab: {fileID: 1798332517880667212, guid: a11b9c92053db224394e038a566ec9f3,
     type: 3}
   generationAnimationTime: 0.01
@@ -496,10 +492,25 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 8005147284937092676, guid: c65a0b0b2e52ab745a3614472de0710b,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1721960302}
+    - target: {fileID: 8005147284937092676, guid: c65a0b0b2e52ab745a3614472de0710b,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: PlacePlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005147284937092676, guid: c65a0b0b2e52ab745a3614472de0710b,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: DBGA.GameManager.GameManager, DBGA.GameManager
+      objectReference: {fileID: 0}
     - target: {fileID: 8697117434181467637, guid: c65a0b0b2e52ab745a3614472de0710b,
         type: 3}
       propertyPath: m_Name
-      value: UI
+      value: InGameUI
       objectReference: {fileID: 0}
     - target: {fileID: 8697117434181467641, guid: c65a0b0b2e52ab745a3614472de0710b,
         type: 3}

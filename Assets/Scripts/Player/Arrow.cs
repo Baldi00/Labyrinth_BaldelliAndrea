@@ -25,6 +25,8 @@ namespace DBGA.MazePlayer
         private Direction currentDirection;
         private GameEventsManager gameEventsManager;
 
+        public int OwnerPlayerNumber { set; get; }
+
         void Awake()
         {
             gameEventsManager = GameEventsManager.Instance;
@@ -106,11 +108,11 @@ namespace DBGA.MazePlayer
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.MONSTER:
-                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent());
+                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent() { playerNumber = OwnerPlayerNumber});
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.PLAYER:
-                    gameEventsManager.DispatchGameEvent(new ArrowHitPlayerEvent());
+                    HandleCollisionWithPlayer(raycastHits);
                     Destroy(gameObject);
                     break;
             }
@@ -134,6 +136,24 @@ namespace DBGA.MazePlayer
                 tunnelCenterGameObject.transform.position.z);
 
             SetArrowDirection(tunnel.GetOutDirection(currentDirection.GetOppositeDirection()));
+        }
+
+        /// <summary>
+        /// Sends the arrow hit player event with the informations about the shooter and the hit players
+        /// </summary>
+        /// <param name="raycastHits">The list of raycast hits including the one with the player</param>
+        private void HandleCollisionWithPlayer(RaycastHit[] raycastHits)
+        {
+            Player hitPlayer = raycastHits
+                .Where<RaycastHit>(hit => hit.collider.CompareTag("Player"))
+                .ElementAt<RaycastHit>(0)
+                .collider.GetComponent<Player>();
+
+            gameEventsManager.DispatchGameEvent(new ArrowHitPlayerEvent()
+            {
+                shooterPlayerNumber = OwnerPlayerNumber,
+                hitPlayerNumber = hitPlayer.PlayerNumber
+            });
         }
     }
 }

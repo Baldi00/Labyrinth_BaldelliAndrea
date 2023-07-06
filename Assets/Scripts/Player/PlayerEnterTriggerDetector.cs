@@ -8,6 +8,8 @@ namespace DBGA.MazePlayer
     {
         private GameEventsManager gameEventsManager;
 
+        public int PlayerNumber { set; get; }
+
         void Awake()
         {
             gameEventsManager = GameEventsManager.Instance;
@@ -18,22 +20,28 @@ namespace DBGA.MazePlayer
             switch (other.tag)
             {
                 case "Monster":
-                    gameEventsManager.DispatchGameEvent(new EnteredMonsterTileEvent());
+                    gameEventsManager.DispatchGameEvent(new EnteredMonsterTileEvent()
+                    { playerNumber = PlayerNumber });
                     break;
                 case "AdjacentMonster":
-                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent() { isPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent()
+                    { playerNumber = PlayerNumber, isPlayerInside = true });
                     break;
                 case "Well":
-                    gameEventsManager.DispatchGameEvent(new EnteredWellTileEvent());
+                    gameEventsManager.DispatchGameEvent(new EnteredWellTileEvent()
+                    { playerNumber = PlayerNumber });
                     break;
                 case "AdjacentWell":
-                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent() { isPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent() 
+                    { playerNumber = PlayerNumber, isPlayerInside = true });
                     break;
                 case "Teleport":
-                    gameEventsManager.DispatchGameEvent(new EnteredTeleportTileEvent());
+                    gameEventsManager.DispatchGameEvent(new EnteredTeleportTileEvent()
+                    { playerNumber = PlayerNumber });
                     break;
                 case "AdjacentTeleport":
-                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent() { isPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent()
+                    { playerNumber = PlayerNumber, isPlayerInside = true });
                     break;
             }
         }
@@ -43,13 +51,16 @@ namespace DBGA.MazePlayer
             switch (other.tag)
             {
                 case "AdjacentMonster":
-                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent() { isPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent() 
+                    { playerNumber = PlayerNumber, isPlayerInside = false });
                     break;
                 case "AdjacentWell":
-                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent() { isPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent() 
+                    { playerNumber = PlayerNumber, isPlayerInside = false });
                     break;
                 case "AdjacentTeleport":
-                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent() { isPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent() 
+                    { playerNumber = PlayerNumber, isPlayerInside = false });
                     break;
             }
         }
