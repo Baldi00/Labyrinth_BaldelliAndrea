@@ -42,24 +42,26 @@ namespace DBGA.GameManager
         private GameObject mapContainer;
         private Tile[][] grid;
 
-        private MapElementsList mapElementsList;
-
-        private Fog[][] fogGrid;
-        private GameObject fogContainer;
-        private bool isFogVisible;
-
+        /// <summary>
+        /// The player list will contain all added players, also the ones who has lost and are disabled
+        /// </summary>
         private List<Player> players;
         private Player currentPlayer;
         private int currentPlayerIndex;
         private Dictionary<int, Color> playerColors;
 
+        private MapElementsList mapElementsList;
         private GameObject monster;
         private Tile monsterTile;
 
-        private GameEventsManager gameEventsManager;
+        private Fog[][] fogGrid;
+        private GameObject fogContainer;
+        private bool isFogVisible;
 
         private bool isMapGenerated;
         private bool isGameEnded;
+        
+        private GameEventsManager gameEventsManager;
 
         void Awake()
         {
@@ -113,15 +115,13 @@ namespace DBGA.GameManager
                 case EnteredWellTileEvent:
                 case EnteredMonsterTileEvent:
                 case PlayerLostForNoArrowRemainingEvent:
-                    HandleLostConditionEvents();
+                    HandlePlayerLostEvents(currentPlayerIndex);
                     break;
                 case ArrowHitPlayerEvent arrowHitPlayerEvent:
                     HandleArrowHitPlayerEvent(arrowHitPlayerEvent);
                     break;
                 case ArrowCollidedWithMonsterEvent:
-                    isGameEnded = true;
-                    players.ForEach(player => player.IgnoreInputs = true);
-                    SetFogVisibility(false);
+                    EndGame();
                     break;
                 case PlayerExploredTileEvent playerExploredTileEvent:
                     HandlePlayerExploredTileEvent(playerExploredTileEvent);
@@ -136,28 +136,35 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Places a player on a random empty tile
+        /// Instantiates and places a player on a random empty tile, sets its number, color,
+        /// and adds it into the players list
         /// </summary>
-        /// <see cref="IsEmptyTile"/>
+        /// <see cref="GetRandomPositionOnEmptyTile"/>
         public void PlacePlayer()
         {
             if (!isMapGenerated)
                 return;
 
+            // Instantiates and places the player
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             GameObject playerGameObject = InstantiateOnTile(playerPrefab.gameObject, randomPosition, null);
             Player placedPlayer = playerGameObject.GetComponent<Player>();
             placedPlayer.PositionOnGrid = randomPosition;
-            int playerNumber = players.Count;
-            placedPlayer.PlayerNumber = playerNumber;
-            playerGameObject.GetComponent<PlayerEnterTriggerDetector>().PlayerNumber = playerNumber;
-            players.Add(placedPlayer);
 
+            // Sets the player number and adds to the player list
+            int placedPlayerNumber = players.Count;
+            placedPlayer.PlayerNumber = placedPlayerNumber;
+            playerGameObject.GetComponent<PlayerEnterTriggerDetector>().PlayerNumber = placedPlayerNumber;
+
+            // Sets a random color (or blue if player 1)
             Color playerColor = Color.HSVToRGB(Random.Range(0f, 1f), 1f, 1f);
-            if (playerNumber == 0)
+            if (placedPlayerNumber == 0)
                 playerColor = Color.blue;
             placedPlayer.GetComponentInChildren<Renderer>().material.color = playerColor;
-            playerColors.Add(playerNumber, playerColor);
+            playerColors.Add(placedPlayerNumber, playerColor);
+
+            // Adds the player to the players list
+            players.Add(placedPlayer);
 
             gameEventsManager.DispatchGameEvent(new PlayerAddedEvent() { playerNumber = placedPlayer.PlayerNumber });
         }
@@ -212,9 +219,10 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Generates the map and instantiates it in game
+        /// Generates the map and instantiates it in game, calls the given callback when the map is generated
         /// </summary>
-        private void PlaceMap(System.Action<Tile[][]> onMapGenerated)
+        /// <param name="onMapGeneratedCallback">Callback called after the map is generated</param>
+        private void PlaceMap(System.Action<Tile[][]> onMapGeneratedCallback)
         {
             if (mapContainer != null)
                 Destroy(mapContainer);
@@ -222,28 +230,37 @@ namespace DBGA.GameManager
             if (generateRandomMap)
             {
                 mapContainer = new("MapContainer");
-                StartCoroutine(mapGenerator.GenerateMap(gridSize, mapContainer.transform, onMapGenerated));
+                StartCoroutine(mapGenerator.GenerateMap(gridSize, mapContainer.transform, onMapGeneratedCallback));
             }
             else
             {
-                mapContainer = Instantiate(precomputedMap, Vector3.zero, Quaternion.identity, transform);
-                mapContainer.name = "MapContainer";
-                Tile[] tiles = new Tile[gridSize * gridSize];
-                for (int childIndex = 0; childIndex < mapContainer.transform.childCount; childIndex++)
-                    tiles[childIndex] = mapContainer.transform.GetChild(childIndex).GetComponent<Tile>();
-
-                Tile[][] grid = Utils.ArrayToMatrix<Tile>(tiles, gridSize, gridSize);
-                for (int row = 0; row < gridSize; row++)
-                    for (int col = 0; col < gridSize; col++)
-                        grid[row][col].PositionOnGrid = new Vector2Int(row, col);
-
-                onMapGenerated?.Invoke(grid);
+                Tile[][] precomputedGrid = SetupPrecomputedMap();
+                onMapGeneratedCallback?.Invoke(precomputedGrid);
             }
             mapContainer.transform.parent = transform;
         }
 
         /// <summary>
-        /// Places fog on the grid
+        /// Instantiates the precomputed map and sets up the tiles grid
+        /// </summary>
+        /// <returns>The prepared tiles grid</returns>
+        private Tile[][] SetupPrecomputedMap()
+        {
+            mapContainer = Instantiate(precomputedMap, Vector3.zero, Quaternion.identity, transform);
+            mapContainer.name = "MapContainer";
+            Tile[] tiles = new Tile[gridSize * gridSize];
+            for (int childIndex = 0; childIndex < mapContainer.transform.childCount; childIndex++)
+                tiles[childIndex] = mapContainer.transform.GetChild(childIndex).GetComponent<Tile>();
+
+            Tile[][] precomputedGrid = Utils.ArrayToMatrix<Tile>(tiles, gridSize, gridSize);
+            for (int row = 0; row < gridSize; row++)
+                for (int col = 0; col < gridSize; col++)
+                    precomputedGrid[row][col].PositionOnGrid = new Vector2Int(row, col);
+            return precomputedGrid;
+        }
+
+        /// <summary>
+        /// Instantiates and places the fog tiles on the grid
         /// </summary>
         private void PlaceFog()
         {
@@ -269,8 +286,9 @@ namespace DBGA.GameManager
         /// <summary>
         /// Returns a random position of an empty tile on the grid
         /// </summary>
-        /// <see cref="IsEmptyTile"/>
         /// <returns>A random position of an empty tile on the grid</returns>
+        /// <see cref="IsEmptyTile"/>
+        /// <exception cref="NoEmptyTilesRemainingException">Thrown if an empty random tile couldn't be find</exception>
         private Vector2Int GetRandomPositionOnEmptyTile()
         {
             int iterations = 0;
@@ -282,11 +300,11 @@ namespace DBGA.GameManager
                 {
                     ThroughScenesParameters.mapGenerationError = true;
                     SceneManager.LoadScene("MainMenuScene");
-                    throw new System.InvalidOperationException("Trying to create map with wrong parameters");
+                    throw new NoEmptyTilesRemainingException("No more empty tiles on the map");
                 }
 
                 randomPosition =
-                    new Vector2Int(UnityEngine.Random.Range(0, gridSize), UnityEngine.Random.Range(0, gridSize));
+                    new Vector2Int(Random.Range(0, gridSize), Random.Range(0, gridSize));
             } while (!IsEmptyTile(randomPosition));
 
             return randomPosition;
@@ -387,7 +405,7 @@ namespace DBGA.GameManager
         }
 
         /// <summary>
-        /// Asks player to shot an arrow
+        /// Asks the current player to shot an arrow than stops its inputs
         /// </summary>
         /// <param name="inputArrowShotEvent"></param>
         private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
@@ -417,7 +435,8 @@ namespace DBGA.GameManager
         {
             TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
-                gameEventsManager.DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent() { playerNumber = currentPlayerIndex});
+                gameEventsManager
+                    .DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent() { playerNumber = currentPlayerIndex });
             else
                 ProceedToNextPlayer();
         }
@@ -453,7 +472,7 @@ namespace DBGA.GameManager
                 return;
 
             currentPlayer.IgnoreInputs = true;
-            
+
             do
                 currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
             while (players[currentPlayerIndex].HasPlayerLost);
@@ -503,42 +522,53 @@ namespace DBGA.GameManager
                     }
         }
 
+        /// <summary>
+        /// Removes a player from the game
+        /// </summary>
+        /// <param name="playerNumber"></param>
         private void RemovePlayer(int playerNumber)
         {
             players[playerNumber].HasPlayerLost = true;
             players[playerNumber].gameObject.SetActive(false);
         }
 
-        private void HandleLostConditionEvents()
+        /// <summary>
+        /// Handles the lost condition events by removing the player who lost in case of guest players
+        /// or by ending the game if the player 1 (main) lost
+        /// </summary>
+        /// <param name="playerNumber">The player that has lost</param>
+        /// <see cref="EndGame"/>
+        private void HandlePlayerLostEvents(int playerNumber)
         {
-            // My player lost
-            if (currentPlayerIndex == 0)
-            {
-                isGameEnded = true;
-                players.ForEach(player => player.IgnoreInputs = true);
-                SetFogVisibility(false);
-            }
-            // Other player lost
+            if (playerNumber == 0)
+                // My player lost
+                EndGame();
             else
             {
-                RemovePlayer(currentPlayerIndex);
+                // Other player lost
+                RemovePlayer(playerNumber);
                 ProceedToNextPlayer();
             }
         }
 
+        /// <summary>
+        /// Handle the event of a player that has been hit by an arrow. The hit player loses
+        /// </summary>
+        /// <param name="arrowHitPlayerEvent">The event containing the arrow hit info</param>
+        /// <see cref="HandlePlayerLostEvents"/>
         private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
         {
-            if(arrowHitPlayerEvent.hitPlayerNumber == 0)
-            {
-                isGameEnded = true;
-                players.ForEach(player => player.IgnoreInputs = true);
-                SetFogVisibility(false);
-            }
-            else
-            {
-                RemovePlayer(arrowHitPlayerEvent.hitPlayerNumber);
-                ProceedToNextPlayer();
-            }
+            HandlePlayerLostEvents(arrowHitPlayerEvent.hitPlayerNumber);
+        }
+
+        /// <summary>
+        /// Disable all players inputs and reveals fog
+        /// </summary>
+        private void EndGame()
+        {
+            isGameEnded = true;
+            players.ForEach(player => player.IgnoreInputs = true);
+            SetFogVisibility(false);
         }
 
     }
