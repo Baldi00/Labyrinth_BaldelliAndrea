@@ -47,10 +47,10 @@ namespace DBGA.MapGeneration
             RemoveInvalidTilesFromBorderDomains(domains);
 
             // Select random start position
-            Vector2Int randomStartPosition = new Vector2Int(Random.Range(0, gridSize), Random.Range(0, gridSize));
+            Vector2Int randomStartPosition = new(Random.Range(0, gridSize), Random.Range(0, gridSize));
 
             // Setup positions queue
-            Queue<Vector2Int> positionsToFill = new Queue<Vector2Int>();
+            Queue<Vector2Int> positionsToFill = new();
             positionsToFill.Enqueue(randomStartPosition);
 
             // Fill positions
@@ -115,8 +115,8 @@ namespace DBGA.MapGeneration
                 domains[row] = new List<Tile>[gridSize];
 
             List<Tile> allTilesPrefab =
-                currentTilesList.availableTiles
-                .Select<TileListItem, Tile>(tli => tli.tile)
+                currentTilesList.AvailableTiles
+                .Select<TileListItem, Tile>(tli => tli.Tile)
                 .ToList<Tile>();
 
             for (int row = 0; row < gridSize; row++)
@@ -188,7 +188,7 @@ namespace DBGA.MapGeneration
         /// <returns>The probability ranges for the tiles in the given domain</returns>
         private Dictionary<ProbabilityRange, Tile> GetTilesProbabilityRanges(List<Tile> domain)
         {
-            Dictionary<ProbabilityRange, Tile> tilesProbability = new Dictionary<ProbabilityRange, Tile>();
+            Dictionary<ProbabilityRange, Tile> tilesProbability = new();
 
             float totalTilesProbabilityWeight = 0;
             foreach (Tile tile in domain)
@@ -234,9 +234,9 @@ namespace DBGA.MapGeneration
         /// <param name="parent">The parent transform under which the game object will be instantiated</param>
         private void InstantiateAndPlaceTile(Tile tileToPlace, Vector2Int positionToFill, Transform parent)
         {
-            GameObject tilePrefab = currentTilesList.availableTiles
-                .Where<TileListItem>(tli => tli.tile == tileToPlace)
-                .Select<TileListItem, GameObject>(tli => tli.tilePrefab)
+            GameObject tilePrefab = currentTilesList.AvailableTiles
+                .Where<TileListItem>(tli => tli.Tile == tileToPlace)
+                .Select<TileListItem, GameObject>(tli => tli.TilePrefab)
                 .ElementAt<GameObject>(0);
 
             GameObject tileInstanceGameObject = Instantiate(

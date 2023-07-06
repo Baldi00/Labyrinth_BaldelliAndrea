@@ -48,7 +48,7 @@ namespace DBGA.MazePlayer
             set
             {
                 positionOnGrid = value;
-                gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = positionOnGrid });
+                gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { PositionOnGrid = positionOnGrid });
             }
             get => positionOnGrid;
         }
@@ -61,7 +61,7 @@ namespace DBGA.MazePlayer
 
         void Start()
         {
-            gameEventsManager.DispatchGameEvent(new InitializeArrowCountEvent() { remainingArrows = currentArrowsCount });
+            gameEventsManager.DispatchGameEvent(new InitializeArrowCountEvent() { RemainingArrows = currentArrowsCount });
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace DBGA.MazePlayer
 
             arrow.SetArrowDirection(shotDirection);
             arrow.OwnerPlayerNumber = PlayerNumber;
-            gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { remainingArrows = currentArrowsCount });
+            gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { RemainingArrows = currentArrowsCount });
 
             return true;
         }
@@ -208,7 +208,7 @@ namespace DBGA.MazePlayer
             isInMoveAnimation = true;
             float animationTimer = 0;
             Vector3 startPosition3d = transform.position;
-            Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
+            Vector3 nextPosition3d = new(nextPosition.x, 0f, nextPosition.y);
             while (animationTimer < animationDuration)
             {
                 transform.position = Vector3.Lerp(
@@ -237,7 +237,7 @@ namespace DBGA.MazePlayer
             {
                 float animationTimer = 0;
                 Vector3 startPosition3d = transform.position;
-                Vector3 nextPosition3d = new Vector3(nextPosition.x, 0f, nextPosition.y);
+                Vector3 nextPosition3d = new(nextPosition.x, 0f, nextPosition.y);
                 while (animationTimer < animationDuration)
                 {
                     transform.position = Vector3.Lerp(

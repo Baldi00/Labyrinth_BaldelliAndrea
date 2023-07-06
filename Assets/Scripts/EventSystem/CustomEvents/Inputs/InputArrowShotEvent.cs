@@ -5,8 +5,8 @@ namespace DBGA.EventSystem
     /// <summary>
     /// Called when the player wants to shoot an arrow (doesn't mean the arrow will be actually shot in game)
     /// </summary>
-    public class InputArrowShotEvent : GameEvent
+    public class InputArrowShotEvent : IGameEvent
     {
-        public Direction direction;
+        public Direction Direction { set; get; }
     }
 }

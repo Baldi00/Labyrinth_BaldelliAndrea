@@ -96,7 +96,7 @@ namespace DBGA.GameManager
             gameEventsManager.RemoveAllGameEventListeners();
         }
 
-        public void ReceiveGameEvent(GameEvent gameEvent)
+        public void ReceiveGameEvent(IGameEvent gameEvent)
         {
             switch (gameEvent)
             {
@@ -166,7 +166,7 @@ namespace DBGA.GameManager
             // Adds the player to the players list
             players.Add(placedPlayer);
 
-            gameEventsManager.DispatchGameEvent(new PlayerAddedEvent() { playerNumber = placedPlayer.PlayerNumber });
+            gameEventsManager.DispatchGameEvent(new PlayerAddedEvent() { PlayerNumber = placedPlayer.PlayerNumber });
         }
 
         /// <summary>
@@ -194,14 +194,14 @@ namespace DBGA.GameManager
         /// <see cref="IsEmptyTile"/>
         private void PlaceMapElements()
         {
-            foreach (MapElementsListItem mapElementsItem in mapElementsList.mapElements)
-                for (int i = 0; i < mapElementsItem.count; i++)
+            foreach (MapElementsListItem mapElementsItem in mapElementsList.MapElements)
+                for (int i = 0; i < mapElementsItem.Count; i++)
                 {
                     Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
-                    GameObject mapElement = InstantiateOnTile(mapElementsItem.prefab, randomPosition, transform);
+                    GameObject mapElement = InstantiateOnTile(mapElementsItem.Prefab, randomPosition, transform);
                     Tile placementTile = GetTileAtPosition(randomPosition);
 
-                    switch (mapElementsItem.mapElement)
+                    switch (mapElementsItem.MapElementType)
                     {
                         case MapElementType.MONSTER:
                             placementTile.HasMonster = true;
@@ -394,11 +394,11 @@ namespace DBGA.GameManager
         /// <param name="inputMoveEvent">The event that triggered the movement containing the direction of the movement</param>
         private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
         {
-            Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.direction);
+            Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.Direction);
 
             Player.MoveOutcome moveOutcome = Player.MoveOutcome.FAIL_CANT_PROCEED;
             if (Utils.IsPositionInsideGrid(nextPosition, gridSize))
-                moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.direction);
+                moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.Direction);
 
             if (moveOutcome == Player.MoveOutcome.FAIL_CANT_PROCEED)
                 gameEventsManager.DispatchGameEvent(new InvalidMoveEvent());
@@ -410,7 +410,7 @@ namespace DBGA.GameManager
         /// <param name="inputArrowShotEvent"></param>
         private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
         {
-            currentPlayer.ShotArrow(inputArrowShotEvent.direction);
+            currentPlayer.ShotArrow(inputArrowShotEvent.Direction);
             currentPlayer.IgnoreInputs = true;
         }
 
@@ -420,10 +420,10 @@ namespace DBGA.GameManager
         /// <param name="playerExploredTileEvent"></param>
         private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
         {
-            if (!GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored)
+            if (!GetTileAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored)
             {
-                GetTileAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
-                GetFogAtPosition(playerExploredTileEvent.positionOnGrid).PlayerExplored = true;
+                GetTileAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored = true;
+                GetFogAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored = true;
             }
         }
 
@@ -436,7 +436,7 @@ namespace DBGA.GameManager
             TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
                 gameEventsManager
-                    .DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent() { playerNumber = currentPlayerIndex });
+                    .DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent() { PlayerNumber = currentPlayerIndex });
             else
                 ProceedToNextPlayer();
         }
@@ -483,9 +483,9 @@ namespace DBGA.GameManager
             gameEventsManager
                 .DispatchGameEvent(new PlayerStartedTurnEvent()
                 {
-                    playerNumber = currentPlayerIndex,
-                    playerArrowsCount = currentPlayer.CurrentArrowsCount,
-                    playerColor = playerColors[currentPlayerIndex]
+                    PlayerNumber = currentPlayerIndex,
+                    PlayerArrowsCount = currentPlayer.CurrentArrowsCount,
+                    PlayerColor = playerColors[currentPlayerIndex]
                 });
         }
 
@@ -558,7 +558,7 @@ namespace DBGA.GameManager
         /// <see cref="HandlePlayerLostEvents"/>
         private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
         {
-            HandlePlayerLostEvents(arrowHitPlayerEvent.hitPlayerNumber);
+            HandlePlayerLostEvents(arrowHitPlayerEvent.HitPlayerNumber);
         }
 
         /// <summary>

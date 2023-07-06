@@ -51,16 +51,16 @@ namespace DBGA.UI
 
             gridSizeInputField.text = "20";
 
-            xTilesProbability.text = GetListOfTiles("X_Tile")[0].probabilityWeight.ToString();
-            tTilesProbability.text = GetListOfTiles("T_Tile")[0].probabilityWeight.ToString();
-            iTilesProbability.text = GetListOfTiles("I_Tile")[0].probabilityWeight.ToString();
-            lTilesProbability.text = GetListOfTiles("L_Tile", "Double_L_Tile")[0].probabilityWeight.ToString();
-            doubleLTilesProbability.text = GetListOfTiles("Double_L_Tile")[0].probabilityWeight.ToString();
+            xTilesProbability.text = GetListOfTiles("X_Tile")[0].ProbabilityWeight.ToString();
+            tTilesProbability.text = GetListOfTiles("T_Tile")[0].ProbabilityWeight.ToString();
+            iTilesProbability.text = GetListOfTiles("I_Tile")[0].ProbabilityWeight.ToString();
+            lTilesProbability.text = GetListOfTiles("L_Tile", "Double_L_Tile")[0].ProbabilityWeight.ToString();
+            doubleLTilesProbability.text = GetListOfTiles("Double_L_Tile")[0].ProbabilityWeight.ToString();
 
-            teleportsInputField.text = initialMapElementsList.mapElements
-                .Find(element => element.mapElement == MapElementType.TELEPORT).count.ToString();
-            wellsInputField.text = initialMapElementsList.mapElements
-                .Find(element => element.mapElement == MapElementType.WELL).count.ToString();
+            teleportsInputField.text = initialMapElementsList.MapElements
+                .Find(element => element.MapElementType == MapElementType.TELEPORT).Count.ToString();
+            wellsInputField.text = initialMapElementsList.MapElements
+                .Find(element => element.MapElementType == MapElementType.WELL).Count.ToString();
         }
 
         public void LoadPrecomputedMazeScene()
@@ -80,10 +80,10 @@ namespace DBGA.UI
 
         private List<TileListItem> GetListOfTiles(string contains, string notContains = "###")
         {
-            return initialTilesList.availableTiles
+            return initialTilesList.AvailableTiles
                 .Where<TileListItem>(
-                tile => tile.tilePrefab.name.Contains(contains) &&
-                !tile.tilePrefab.name.Contains(notContains))
+                tile => tile.TilePrefab.name.Contains(contains) &&
+                !tile.TilePrefab.name.Contains(notContains))
                 .ToList<TileListItem>();
         }
 
@@ -95,13 +95,13 @@ namespace DBGA.UI
             List<TileListItem> lTilesList = GetListOfTiles("L_Tile", "Double_L_Tile");
             List<TileListItem> doubleLTilesList = GetListOfTiles("Double_L_Tile");
 
-            xTilesList.ForEach(tile => tile.probabilityWeight = Mathf.Max(0, float.Parse(xTilesProbability.text)));
-            tTilesList.ForEach(tile => tile.probabilityWeight = Mathf.Max(0, float.Parse(tTilesProbability.text)));
-            iTilesList.ForEach(tile => tile.probabilityWeight = Mathf.Max(0, float.Parse(iTilesProbability.text)));
-            lTilesList.ForEach(tile => tile.probabilityWeight = Mathf.Max(0, float.Parse(lTilesProbability.text)));
-            doubleLTilesList.ForEach(tile => tile.probabilityWeight = Mathf.Max(0, float.Parse(doubleLTilesProbability.text)));
+            xTilesList.ForEach(tile => tile.ProbabilityWeight = Mathf.Max(0, float.Parse(xTilesProbability.text)));
+            tTilesList.ForEach(tile => tile.ProbabilityWeight = Mathf.Max(0, float.Parse(tTilesProbability.text)));
+            iTilesList.ForEach(tile => tile.ProbabilityWeight = Mathf.Max(0, float.Parse(iTilesProbability.text)));
+            lTilesList.ForEach(tile => tile.ProbabilityWeight = Mathf.Max(0, float.Parse(lTilesProbability.text)));
+            doubleLTilesList.ForEach(tile => tile.ProbabilityWeight = Mathf.Max(0, float.Parse(doubleLTilesProbability.text)));
 
-            List<TileListItem> tilesListItems = new List<TileListItem>();
+            List<TileListItem> tilesListItems = new();
             tilesListItems.AddRange(xTilesList);
             tilesListItems.AddRange(tTilesList);
             tilesListItems.AddRange(iTilesList);
@@ -109,7 +109,7 @@ namespace DBGA.UI
             tilesListItems.AddRange(doubleLTilesList);
 
             TilesList tilesList = ScriptableObject.CreateInstance<TilesList>();
-            tilesList.availableTiles = tilesListItems;
+            tilesList.AvailableTiles = tilesListItems;
 
             ThroughScenesParameters.TilesList = tilesList;
         }
@@ -117,28 +117,28 @@ namespace DBGA.UI
         private void SetMapElementsInThroughSceneParameters()
         {
             MapElementsList mapElementsList = ScriptableObject.CreateInstance<MapElementsList>();
-            mapElementsList.mapElements = new List<MapElementsListItem>()
+            mapElementsList.MapElements = new List<MapElementsListItem>()
             {
                 new MapElementsListItem()
                 {
-                    mapElement = MapElementType.MONSTER,
-                    prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElementType.MONSTER).prefab,
-                    count = 1
+                    MapElementType = MapElementType.MONSTER,
+                    Prefab = initialMapElementsList.MapElements
+                        .Find(element => element.MapElementType == MapElementType.MONSTER).Prefab,
+                    Count = 1
                 },
                 new MapElementsListItem()
                 {
-                    mapElement = MapElementType.TELEPORT,
-                    prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElementType.TELEPORT).prefab,
-                    count = Mathf.Max(0, int.Parse(teleportsInputField.text))
+                    MapElementType = MapElementType.TELEPORT,
+                    Prefab = initialMapElementsList.MapElements
+                        .Find(element => element.MapElementType == MapElementType.TELEPORT).Prefab,
+                    Count = Mathf.Max(0, int.Parse(teleportsInputField.text))
                 },
                 new MapElementsListItem()
                 {
-                    mapElement = MapElementType.WELL,
-                    prefab = initialMapElementsList.mapElements
-                        .Find(element => element.mapElement == MapElementType.WELL).prefab,
-                    count = Mathf.Max(0, int.Parse(wellsInputField.text))
+                    MapElementType = MapElementType.WELL,
+                    Prefab = initialMapElementsList.MapElements
+                        .Find(element => element.MapElementType == MapElementType.WELL).Prefab,
+                    Count = Mathf.Max(0, int.Parse(wellsInputField.text))
                 },
             };
 

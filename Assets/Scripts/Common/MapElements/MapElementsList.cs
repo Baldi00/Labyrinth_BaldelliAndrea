@@ -9,6 +9,9 @@ namespace DBGA.Common
     [CreateAssetMenu(fileName = "MapElementsList", menuName = "Labyrinth/Create Map Elements List", order = 1)]
     public class MapElementsList : ScriptableObject
     {
-        public List<MapElementsListItem> mapElements;
+        [SerializeField]
+        private List<MapElementsListItem> mapElements;
+
+        public List<MapElementsListItem> MapElements { set => mapElements = value; get => mapElements; }
     }
 }

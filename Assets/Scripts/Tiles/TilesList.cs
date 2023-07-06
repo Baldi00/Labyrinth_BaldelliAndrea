@@ -10,7 +10,10 @@ namespace DBGA.Tiles
     [CreateAssetMenu(fileName = "TilesList", menuName = "Labyrinth/Create Tiles List", order = 1)]
     public class TilesList : ScriptableObject
     {
-        public List<TileListItem> availableTiles;
+        [SerializeField]
+        private List<TileListItem> availableTiles;
+
+        public List<TileListItem> AvailableTiles { set => availableTiles = value; get => availableTiles; }
 
         /// <summary>
         /// Returns the probability weight of the given tile in this list
@@ -19,10 +22,10 @@ namespace DBGA.Tiles
         /// <returns>The probability weight of the given tile in this list</returns>
         public float GetProbabilityWeight(Tile tile)
         {
-            if (availableTiles.Any<TileListItem>(item => item.tile == tile))
+            if (availableTiles.Any<TileListItem>(item => item.Tile == tile))
                 return availableTiles
-                    .Where<TileListItem>(item => item.tile == tile)
-                    .ElementAt<TileListItem>(0).probabilityWeight;
+                    .Where<TileListItem>(item => item.Tile == tile)
+                    .ElementAt<TileListItem>(0).ProbabilityWeight;
 
             return 0;
         }

@@ -11,8 +11,15 @@ namespace DBGA.Common
     [Serializable]
     public class MapElementsListItem
     {
-        public MapElementType mapElement;
-        public GameObject prefab;
-        public int count;
+        [SerializeField]
+        private MapElementType mapElement;
+        [SerializeField]
+        private GameObject prefab;
+        [SerializeField]
+        private int count;
+
+        public MapElementType MapElementType { set => mapElement = value; get => mapElement; }
+        public GameObject Prefab { set => prefab = value; get => prefab; }
+        public int Count { set => count = value; get => count; }
     }
 }

@@ -179,7 +179,7 @@ namespace DBGA.Tiles
             if (nextTile.direction == Direction.None)
                 return;
 
-            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { positionOnGrid = PositionOnGrid });
+            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { PositionOnGrid = PositionOnGrid });
 
             // Next tile is a tunnel, reveal next tile
             if (nextTile.tile is Tunnel nextTunnelTile)
@@ -195,8 +195,8 @@ namespace DBGA.Tiles
             HashSet<Direction> availableDirections = new HashSet<Direction>();
             foreach (Cross cross in availableCrossings)
             {
-                availableDirections.Add(cross.direction1);
-                availableDirections.Add(cross.direction2);
+                availableDirections.Add(cross.Direction1);
+                availableDirections.Add(cross.Direction2);
             }
             return availableDirections.ToList<Direction>();
         }
@@ -212,10 +212,10 @@ namespace DBGA.Tiles
         {
             foreach (Cross cross in availableCrossings)
             {
-                if (cross.direction1 == enterDirection)
-                    return cross.direction2;
-                else if (cross.direction2 == enterDirection)
-                    return cross.direction1;
+                if (cross.Direction1 == enterDirection)
+                    return cross.Direction2;
+                else if (cross.Direction2 == enterDirection)
+                    return cross.Direction1;
             }
             return Direction.None;
         }

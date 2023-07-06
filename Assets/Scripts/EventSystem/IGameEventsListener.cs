@@ -27,6 +27,6 @@ namespace DBGA.EventSystem
     /// </summary>
     public interface IGameEventsListener
     {
-        public void ReceiveGameEvent(GameEvent gameEvent);
+        public void ReceiveGameEvent(IGameEvent gameEvent);
     }
 }

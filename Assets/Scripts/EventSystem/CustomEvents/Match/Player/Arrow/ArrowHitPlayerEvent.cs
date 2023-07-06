@@ -1,9 +1,9 @@
 namespace DBGA.EventSystem
 {
     // Called when an arrow collides with a player
-    public class ArrowHitPlayerEvent : GameEvent
+    public class ArrowHitPlayerEvent : IGameEvent
     {
-        public int shooterPlayerNumber;
-        public int hitPlayerNumber;
+        public int ShooterPlayerNumber { set; get; }
+        public int HitPlayerNumber { set; get; }
     }
 }

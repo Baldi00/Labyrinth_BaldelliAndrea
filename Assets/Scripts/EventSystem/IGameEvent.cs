@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace DBGA.EventSystem
 {
     /// <summary>
@@ -7,9 +5,9 @@ namespace DBGA.EventSystem
     /// 
     /// HOW TO USE:
     /// 
-    /// Extend this class to create your custom game event with public parameters
+    /// Implement this interface to create your custom game event with public parameters
     /// e.g.
-    /// public class MyCustomGameEvent : GameEvent 
+    /// public class MyCustomGameEvent : IGameEvent 
     /// { 
     ///     public int customParam;
     /// }
@@ -38,8 +36,8 @@ namespace DBGA.EventSystem
     ///     else if ...
     /// }
     /// </summary>
-    public class GameEvent
+    public interface IGameEvent
     {
-        public GameObject callerGameObject;
+
     }
 }

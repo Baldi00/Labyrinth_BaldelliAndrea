@@ -108,7 +108,7 @@ namespace DBGA.MazePlayer
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.MONSTER:
-                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent() { playerNumber = OwnerPlayerNumber});
+                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent() { PlayerNumber = OwnerPlayerNumber});
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.PLAYER:
@@ -151,8 +151,8 @@ namespace DBGA.MazePlayer
 
             gameEventsManager.DispatchGameEvent(new ArrowHitPlayerEvent()
             {
-                shooterPlayerNumber = OwnerPlayerNumber,
-                hitPlayerNumber = hitPlayer.PlayerNumber
+                ShooterPlayerNumber = OwnerPlayerNumber,
+                HitPlayerNumber = hitPlayer.PlayerNumber
             });
         }
     }

@@ -64,12 +64,12 @@ namespace DBGA.UI
             playerNumber.color = Color.blue;
         }
 
-        public void ReceiveGameEvent(GameEvent gameEvent)
+        public void ReceiveGameEvent(IGameEvent gameEvent)
         {
             switch (gameEvent)
             {
                 case PlayerAddedEvent playerAddedEvent:
-                    AddCurrentPlayerNumberUIInfoState(playerAddedEvent.playerNumber);
+                    AddCurrentPlayerNumberUIInfoState(playerAddedEvent.PlayerNumber);
                     break;
                 case PlayerStartedTurnEvent nextPlayerStartTurnEvent:
                     HandlePlayerStartedTurnEvent(nextPlayerStartTurnEvent);
@@ -123,10 +123,10 @@ namespace DBGA.UI
         /// <param name="playerStartedTurnEvent">The event containing the info about the current player</param>
         private void HandlePlayerStartedTurnEvent(PlayerStartedTurnEvent playerStartedTurnEvent)
         {
-            currentPlayerNumber = playerStartedTurnEvent.playerNumber;
+            currentPlayerNumber = playerStartedTurnEvent.PlayerNumber;
             playerNumber.text = $"Player {currentPlayerNumber + 1}";
-            playerNumber.color = playerStartedTurnEvent.playerColor;
-            arrowCount.text = $"Arrows: {playerStartedTurnEvent.playerArrowsCount}";
+            playerNumber.color = playerStartedTurnEvent.PlayerColor;
+            arrowCount.text = $"Arrows: {playerStartedTurnEvent.PlayerArrowsCount}";
             UpdateSpecialUI();
         }
 
@@ -134,20 +134,20 @@ namespace DBGA.UI
         /// Handles the special UI updates events
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandleSpecialUIUpdatesEvents(GameEvent gameEvent)
+        private void HandleSpecialUIUpdatesEvents(IGameEvent gameEvent)
         {
             switch (gameEvent)
             {
                 case MonsterTileAdjacentEvent monsterTileAdjacentEvent:
-                    playersUIStates[monsterTileAdjacentEvent.playerNumber].bloodUiOn = monsterTileAdjacentEvent.isPlayerInside;
+                    playersUIStates[monsterTileAdjacentEvent.PlayerNumber].bloodUiOn = monsterTileAdjacentEvent.IsPlayerInside;
                     UpdateSpecialUI();
                     break;
                 case WellTileAdjacentEvent wellTileAdjacentEvent:
-                    playersUIStates[wellTileAdjacentEvent.playerNumber].moldUiOn = wellTileAdjacentEvent.isPlayerInside;
+                    playersUIStates[wellTileAdjacentEvent.PlayerNumber].moldUiOn = wellTileAdjacentEvent.IsPlayerInside;
                     UpdateSpecialUI();
                     break;
                 case TeleportTileAdjacentEvent teleportTileAdjacentEvent:
-                    playersUIStates[teleportTileAdjacentEvent.playerNumber].windUiOn = teleportTileAdjacentEvent.isPlayerInside;
+                    playersUIStates[teleportTileAdjacentEvent.PlayerNumber].windUiOn = teleportTileAdjacentEvent.IsPlayerInside;
                     UpdateSpecialUI();
                     break;
             }
@@ -167,18 +167,18 @@ namespace DBGA.UI
         /// Handles the player lose conditions events
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandlePlayerLoseEvents(GameEvent gameEvent)
+        private void HandlePlayerLoseEvents(IGameEvent gameEvent)
         {
             switch (gameEvent)
             {
                 case EnteredWellTileEvent enteredWellTileEvent:
-                    HandleLoseEventsUI(enteredWellTileEvent.playerNumber, youLoseWellDescription);
+                    HandleLoseEventsUI(enteredWellTileEvent.PlayerNumber, youLoseWellDescription);
                     break;
                 case EnteredMonsterTileEvent enteredMonsterTileEvent:
-                    HandleLoseEventsUI(enteredMonsterTileEvent.playerNumber, youLoseMonsterDescription);
+                    HandleLoseEventsUI(enteredMonsterTileEvent.PlayerNumber, youLoseMonsterDescription);
                     break;
                 case PlayerLostForNoArrowRemainingEvent playerLostForNoArrowRemainingEvent:
-                    HandleLoseEventsUI(playerLostForNoArrowRemainingEvent.playerNumber, youLoseNoArrowDescription);
+                    HandleLoseEventsUI(playerLostForNoArrowRemainingEvent.PlayerNumber, youLoseNoArrowDescription);
                     break;
             }
         }
@@ -187,7 +187,7 @@ namespace DBGA.UI
         /// Handles the events that involves an arrow
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandleArrowEvents(GameEvent gameEvent)
+        private void HandleArrowEvents(IGameEvent gameEvent)
         {
             switch (gameEvent)
             {
@@ -195,13 +195,13 @@ namespace DBGA.UI
                     HandleArrowHitPlayerEvent(arrowHitPlayerEvent);
                     break;
                 case ArrowCollidedWithMonsterEvent arrowCollidedWithMonsterEvent:
-                    HandleWinEvent(arrowCollidedWithMonsterEvent.playerNumber);
+                    HandleWinEvent(arrowCollidedWithMonsterEvent.PlayerNumber);
                     break;
                 case ArrowShotEvent arrowShotEvent:
-                    arrowCount.text = $"Arrows: {arrowShotEvent.remainingArrows}";
+                    arrowCount.text = $"Arrows: {arrowShotEvent.RemainingArrows}";
                     break;
                 case InitializeArrowCountEvent initializeArrowCountEvent:
-                    arrowCount.text = $"Arrows: {initializeArrowCountEvent.remainingArrows}";
+                    arrowCount.text = $"Arrows: {initializeArrowCountEvent.RemainingArrows}";
                     break;
             }
         }
@@ -247,7 +247,7 @@ namespace DBGA.UI
         /// <see cref="HandleLoseEventsUI"/>
         private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
         {
-            HandleLoseEventsUI(arrowHitPlayerEvent.hitPlayerNumber, youLoseArrowHitPlayerDescription);
+            HandleLoseEventsUI(arrowHitPlayerEvent.HitPlayerNumber, youLoseArrowHitPlayerDescription);
         }
     }
 }

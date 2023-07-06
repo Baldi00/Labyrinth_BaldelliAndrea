@@ -5,10 +5,10 @@ namespace DBGA.EventSystem
     /// <summary>
     /// Called when a player starts its turn
     /// </summary>
-    public class PlayerStartedTurnEvent : GameEvent
+    public class PlayerStartedTurnEvent : IGameEvent
     {
-        public int playerNumber;
-        public int playerArrowsCount;
-        public Color playerColor;
+        public int PlayerNumber { set; get; }
+        public int PlayerArrowsCount { set; get; }
+        public Color PlayerColor { set; get; }
     }
 }

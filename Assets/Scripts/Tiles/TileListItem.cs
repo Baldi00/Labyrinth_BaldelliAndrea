@@ -9,8 +9,15 @@ namespace DBGA.Tiles
     [System.Serializable]
     public class TileListItem
     {
-        public GameObject tilePrefab;
-        public Tile tile;
-        public float probabilityWeight;
+        [SerializeField]
+        private GameObject tilePrefab;
+        [SerializeField]
+        private Tile tile;
+        [SerializeField]
+        private float probabilityWeight;
+
+        public GameObject TilePrefab { set => tilePrefab = value; get => tilePrefab; }
+        public Tile Tile { set => tile = value; get => tile; }
+        public float ProbabilityWeight { set => probabilityWeight = value; get => probabilityWeight; }
     }
 }

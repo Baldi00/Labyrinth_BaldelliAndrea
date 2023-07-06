@@ -5,8 +5,8 @@ namespace DBGA.EventSystem
     /// (called after a wall is hit to avoid this case:
     /// Player shoots last arrow > You lose is shown > Arrow hits monster > You win is shown)
     /// </summary>
-    public class PlayerLostForNoArrowRemainingEvent : GameEvent
+    public class PlayerLostForNoArrowRemainingEvent : IGameEvent
     {
-        public int playerNumber;
+        public int PlayerNumber { set; get; }
     }
 }

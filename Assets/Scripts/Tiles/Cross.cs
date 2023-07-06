@@ -1,3 +1,4 @@
+using UnityEngine;
 using DBGA.Common;
 
 namespace DBGA.Tiles
@@ -14,7 +15,12 @@ namespace DBGA.Tiles
     [System.Serializable]
     public struct Cross
     {
-        public Direction direction1;
-        public Direction direction2;
+        [SerializeField]
+        private Direction direction1;
+        [SerializeField]
+        private Direction direction2;
+
+        public Direction Direction1 { set => direction1 = value; get => direction1; }
+        public Direction Direction2 { set => direction2 = value; get => direction2; }
     }
 }

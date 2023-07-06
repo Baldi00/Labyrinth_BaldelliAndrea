@@ -55,7 +55,7 @@ namespace DBGA.Editor
             string[] parameters = parametersGUI.Split("\n");
             parameters = parameters.Select<string, string>(s => "public " + s.Replace(";", "") + ";").ToArray<string>();
 
-            StringBuilder parametersFinal = new StringBuilder();
+            StringBuilder parametersFinal = new();
             if (parametersGUI != "")
             {
                 foreach (string p in parameters)

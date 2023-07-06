@@ -83,7 +83,7 @@ namespace DBGA.EventSystem
         /// Receives a game event and dispatches it to the correct listeners
         /// </summary>
         /// <param name="gameEvent">The received event</param>
-        public void DispatchGameEvent(GameEvent gameEvent)
+        public void DispatchGameEvent(IGameEvent gameEvent)
         {
             Type eventType = gameEvent.GetType();
             if (gameEventsListeners.ContainsKey(eventType))
