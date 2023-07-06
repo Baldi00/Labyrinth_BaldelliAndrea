@@ -60,7 +60,7 @@ namespace DBGA.GameManager
 
         private bool isMapGenerated;
         private bool isGameEnded;
-        
+
         private GameEventsManager gameEventsManager;
 
         void Awake()
