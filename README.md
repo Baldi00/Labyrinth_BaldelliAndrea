@@ -35,5 +35,5 @@
 |Extra.3| Online turn based pvp|🟡[^1]|
 |Extra.3x| Local turn based pvp (limitless number of players)|🟢[^1]|
 
-[^1]: Given that we haven't yet studied how to make a multiplayer game, instead of making a bad implementation I preferred to only make a local shared screen multiplayer.
-The code architecture is thought for the multiplayer so it could be easily converted in an online multiplayer game.
+[^1]: Since we haven't studied how to make a multiplayer game yet, instead of making a bad implementation I preferred to make just a local shared screen multiplayer.
+The architecture of the code is designed for multiplayer so it can be easily converted into an online multiplayer game.
