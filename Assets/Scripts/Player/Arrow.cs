@@ -104,11 +104,12 @@ namespace DBGA.MazePlayer
                     HandleCollisionWithTunnelCenter(raycastHits);
                     break;
                 case ArrowRaycastOutcome.WALL:
-                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithWallEvent());
+                    gameEventsManager.DispatchGameEvent(new GameEvent("ArrowCollidedWithWallEvent"));
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.MONSTER:
-                    gameEventsManager.DispatchGameEvent(new ArrowCollidedWithMonsterEvent() { PlayerNumber = OwnerPlayerNumber });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("ArrowCollidedWithMonsterEvent",
+                        new GameEventParameter("PlayerNumber",OwnerPlayerNumber)));
                     Destroy(gameObject);
                     break;
                 case ArrowRaycastOutcome.PLAYER:
@@ -149,11 +150,9 @@ namespace DBGA.MazePlayer
                 .ElementAt<RaycastHit>(0)
                 .collider.GetComponent<Player>();
 
-            gameEventsManager.DispatchGameEvent(new ArrowHitPlayerEvent()
-            {
-                ShooterPlayerNumber = OwnerPlayerNumber,
-                HitPlayerNumber = hitPlayer.PlayerNumber
-            });
+            gameEventsManager.DispatchGameEvent(new GameEvent("ArrowHitPlayerEvent",
+                new GameEventParameter("ShooterPlayerNumber", OwnerPlayerNumber),
+                new GameEventParameter("HitPlayerNumber", hitPlayer.PlayerNumber)));
         }
     }
 }

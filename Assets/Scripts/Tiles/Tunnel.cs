@@ -179,7 +179,8 @@ namespace DBGA.Tiles
             if (nextTile.direction == Direction.None)
                 return;
 
-            gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { PositionOnGrid = PositionOnGrid });
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerExploredTileEvent",
+                new GameEventParameter("PositionOnGrid", PositionOnGrid)));
 
             // Next tile is a tunnel, reveal next tile
             if (nextTile.tile is Tunnel nextTunnelTile)

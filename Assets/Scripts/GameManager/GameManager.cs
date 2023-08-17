@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 namespace DBGA.GameManager
 {
     [DisallowMultipleComponent]
-    public class GameManager : MonoBehaviour, IGameEventsListener
+    public class GameManager : MonoBehaviour
     {
         private const int PRECOMPUTED_MAP_SIZE = 20;
 
@@ -93,46 +93,7 @@ namespace DBGA.GameManager
 
         void OnDestroy()
         {
-            gameEventsManager.RemoveAllGameEventListeners();
-        }
-
-        public void ReceiveGameEvent(IGameEvent gameEvent)
-        {
-            switch (gameEvent)
-            {
-                case InputMoveEvent inputMoveEvent:
-                    HandleInputMoveEvent(inputMoveEvent);
-                    break;
-                case InputArrowShotEvent inputArrowShotEvent:
-                    HandleInputArrowShotEvent(inputArrowShotEvent);
-                    break;
-                case InputToggleFogVisibilityEvent:
-                    HandleToggleFogVisibilityEvent();
-                    break;
-                case EnteredTeleportTileEvent:
-                    TeleportPlayerOntoRandomEmptyTile();
-                    break;
-                case EnteredWellTileEvent:
-                case EnteredMonsterTileEvent:
-                case PlayerLostForNoArrowRemainingEvent:
-                    HandlePlayerLostEvents(currentPlayerIndex);
-                    break;
-                case ArrowHitPlayerEvent arrowHitPlayerEvent:
-                    HandleArrowHitPlayerEvent(arrowHitPlayerEvent);
-                    break;
-                case ArrowCollidedWithMonsterEvent:
-                    EndGame();
-                    break;
-                case PlayerExploredTileEvent playerExploredTileEvent:
-                    HandlePlayerExploredTileEvent(playerExploredTileEvent);
-                    break;
-                case ArrowCollidedWithWallEvent:
-                    HandleArrowCollidedWithWallEvent();
-                    break;
-                case PlayerCompletedMovementEvent:
-                    ProceedToNextPlayer();
-                    break;
-            }
+            gameEventsManager.RemoveEventCallbacks();
         }
 
         /// <summary>
@@ -166,7 +127,8 @@ namespace DBGA.GameManager
             // Adds the player to the players list
             players.Add(placedPlayer);
 
-            gameEventsManager.DispatchGameEvent(new PlayerAddedEvent() { PlayerNumber = placedPlayer.PlayerNumber });
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerAddedEvent",
+                new GameEventParameter("PlayerNumber", placedPlayer.PlayerNumber)));
         }
 
         /// <summary>
@@ -174,18 +136,18 @@ namespace DBGA.GameManager
         /// </summary>
         private void AddGameEventListeners()
         {
-            gameEventsManager.AddGameEventListener(this, typeof(InputMoveEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(InputArrowShotEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(InputToggleFogVisibilityEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(EnteredTeleportTileEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(EnteredWellTileEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(PlayerExploredTileEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(PlayerCompletedMovementEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithWallEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
-            gameEventsManager.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
+            gameEventsManager.AddEventCallback("InputMoveEvent", HandleInputMoveEvent);
+            gameEventsManager.AddEventCallback("InputArrowShotEvent", HandleInputArrowShotEvent);
+            gameEventsManager.AddEventCallback("InputToggleFogVisibilityEvent", HandleToggleFogVisibilityEvent);
+            gameEventsManager.AddEventCallback("EnteredTeleportTileEvent", TeleportPlayerOntoRandomEmptyTile);
+            gameEventsManager.AddEventCallback("EnteredWellTileEvent", HandlePlayerLostEventsCallback);
+            gameEventsManager.AddEventCallback("EnteredMonsterTileEvent", HandlePlayerLostEventsCallback);
+            gameEventsManager.AddEventCallback("PlayerLostForNoArrowRemainingEvent", HandlePlayerLostEventsCallback);
+            gameEventsManager.AddEventCallback("PlayerExploredTileEvent", HandlePlayerExploredTileEvent);
+            gameEventsManager.AddEventCallback("PlayerCompletedMovementEvent", ProceedToNextPlayerCallback);
+            gameEventsManager.AddEventCallback("ArrowCollidedWithWallEvent", HandleArrowCollidedWithWallEvent);
+            gameEventsManager.AddEventCallback("ArrowCollidedWithMonsterEvent", EndGameCallback);
+            gameEventsManager.AddEventCallback("ArrowHitPlayerEvent", HandleArrowHitPlayerEvent);
         }
 
         /// <summary>
@@ -366,7 +328,7 @@ namespace DBGA.GameManager
         /// <summary>
         /// Teleport the player onto another empty tile
         /// </summary>
-        private void TeleportPlayerOntoRandomEmptyTile()
+        private void TeleportPlayerOntoRandomEmptyTile(GameEvent gameEvent)
         {
             Vector2Int randomPosition = GetRandomPositionOnEmptyTile();
             currentPlayer.TeleportToNextPosition(randomPosition);
@@ -392,25 +354,31 @@ namespace DBGA.GameManager
         /// If the movement is allowed moves the player to next tile, otherwise triggers an invalid move event
         /// </summary>
         /// <param name="inputMoveEvent">The event that triggered the movement containing the direction of the movement</param>
-        private void HandleInputMoveEvent(InputMoveEvent inputMoveEvent)
+        private void HandleInputMoveEvent(GameEvent inputMoveEvent)
         {
-            Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveEvent.Direction);
+            if (!inputMoveEvent.TryGetParameter("Direction", out Direction inputMoveDirection))
+                return;
+
+            Vector2Int nextPosition = Utils.GetNextPosition(currentPlayer.PositionOnGrid, inputMoveDirection);
 
             Player.MoveOutcome moveOutcome = Player.MoveOutcome.FAIL_CANT_PROCEED;
             if (Utils.IsPositionInsideGrid(nextPosition, gridSize))
-                moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveEvent.Direction);
+                moveOutcome = currentPlayer.TryMoveToNextPosition(nextPosition, inputMoveDirection);
 
             if (moveOutcome == Player.MoveOutcome.FAIL_CANT_PROCEED)
-                gameEventsManager.DispatchGameEvent(new InvalidMoveEvent());
+                gameEventsManager.DispatchGameEvent(new GameEvent("InvalidMoveEvent"));
         }
 
         /// <summary>
         /// Asks the current player to shot an arrow than stops its inputs
         /// </summary>
         /// <param name="inputArrowShotEvent"></param>
-        private void HandleInputArrowShotEvent(InputArrowShotEvent inputArrowShotEvent)
+        private void HandleInputArrowShotEvent(GameEvent inputArrowShotEvent)
         {
-            currentPlayer.ShotArrow(inputArrowShotEvent.Direction);
+            if (!inputArrowShotEvent.TryGetParameter("Direction", out Direction inputArrowDirection))
+                return;
+
+            currentPlayer.ShotArrow(inputArrowDirection);
             currentPlayer.IgnoreInputs = true;
         }
 
@@ -418,12 +386,15 @@ namespace DBGA.GameManager
         /// Sets the tile as explored by the player and disable fog on that tile
         /// </summary>
         /// <param name="playerExploredTileEvent"></param>
-        private void HandlePlayerExploredTileEvent(PlayerExploredTileEvent playerExploredTileEvent)
+        private void HandlePlayerExploredTileEvent(GameEvent playerExploredTileEvent)
         {
-            if (!GetTileAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored)
+            if (!playerExploredTileEvent.TryGetParameter("PositionOnGrid", out Vector2Int positionOnGrid))
+                return;
+
+            if (!GetTileAtPosition(positionOnGrid).PlayerExplored)
             {
-                GetTileAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored = true;
-                GetFogAtPosition(playerExploredTileEvent.PositionOnGrid).PlayerExplored = true;
+                GetTileAtPosition(positionOnGrid).PlayerExplored = true;
+                GetFogAtPosition(positionOnGrid).PlayerExplored = true;
             }
         }
 
@@ -431,12 +402,13 @@ namespace DBGA.GameManager
         /// Teleports the monster onto anoter tile,
         /// if the player has no remaining arrows tells the game that the player lost
         /// </summary>
-        private void HandleArrowCollidedWithWallEvent()
+        private void HandleArrowCollidedWithWallEvent(GameEvent gameEvent)
         {
             TeleportMonsterOntoRandomEmptyTile();
             if (currentPlayer.CurrentArrowsCount <= 0)
-                gameEventsManager
-                    .DispatchGameEvent(new PlayerLostForNoArrowRemainingEvent() { PlayerNumber = currentPlayerIndex });
+                gameEventsManager.DispatchGameEvent(
+                    new GameEvent("PlayerLostForNoArrowRemainingEvent",
+                    new GameEventParameter("PlayerNumber", currentPlayerIndex)));
             else
                 ProceedToNextPlayer();
         }
@@ -444,7 +416,7 @@ namespace DBGA.GameManager
         /// <summary>
         /// Toggles fog rendering for each tile
         /// </summary>
-        private void HandleToggleFogVisibilityEvent()
+        private void HandleToggleFogVisibilityEvent(GameEvent gameEvent)
         {
             isFogVisible = !isFogVisible;
             SetFogVisibility(isFogVisible);
@@ -461,6 +433,11 @@ namespace DBGA.GameManager
                         fogGrid[row][col].Hide();
                     else if (!grid[row][col].PlayerExplored)
                         fogGrid[row][col].Show();
+        }
+
+        private void ProceedToNextPlayerCallback(GameEvent gameEvent)
+        {
+            ProceedToNextPlayer();
         }
 
         /// <summary>
@@ -480,13 +457,10 @@ namespace DBGA.GameManager
             currentPlayer = players[currentPlayerIndex];
             mainCamera.SetPlayerTransform(currentPlayer.transform);
             currentPlayer.IgnoreInputs = false;
-            gameEventsManager
-                .DispatchGameEvent(new PlayerStartedTurnEvent()
-                {
-                    PlayerNumber = currentPlayerIndex,
-                    PlayerArrowsCount = currentPlayer.CurrentArrowsCount,
-                    PlayerColor = playerColors[currentPlayerIndex]
-                });
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerStartedTurnEvent",
+                new GameEventParameter("PlayerNumber", currentPlayerIndex),
+                new GameEventParameter("PlayerArrowsCount", currentPlayer.CurrentArrowsCount),
+                new GameEventParameter("PlayerColor", playerColors[currentPlayerIndex])));
         }
 
         /// <summary>
@@ -532,6 +506,11 @@ namespace DBGA.GameManager
             players[playerNumber].gameObject.SetActive(false);
         }
 
+        private void HandlePlayerLostEventsCallback(GameEvent gameEvent)
+        {
+            HandlePlayerLostEvents(currentPlayerIndex);
+        }
+
         /// <summary>
         /// Handles the lost condition events by removing the player who lost in case of guest players
         /// or by ending the game if the player 1 (main) lost
@@ -556,9 +535,17 @@ namespace DBGA.GameManager
         /// </summary>
         /// <param name="arrowHitPlayerEvent">The event containing the arrow hit info</param>
         /// <see cref="HandlePlayerLostEvents"/>
-        private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
+        private void HandleArrowHitPlayerEvent(GameEvent arrowHitPlayerEvent)
         {
-            HandlePlayerLostEvents(arrowHitPlayerEvent.HitPlayerNumber);
+            if (!arrowHitPlayerEvent.TryGetParameter("HitPlayerNumber", out int hitPlayerNumber))
+                return;
+
+            HandlePlayerLostEvents(hitPlayerNumber);
+        }
+
+        private void EndGameCallback(GameEvent gameEvent)
+        {
+            EndGame();
         }
 
         /// <summary>

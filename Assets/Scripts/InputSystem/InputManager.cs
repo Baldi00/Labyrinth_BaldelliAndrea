@@ -50,29 +50,38 @@ namespace DBGA.InputSystem
         [SerializeField]
         private KeyCode toggleFogVisibilityKey;
 
-        private InputMoveEvent inputMoveEvent;
-        private InputArrowShotEvent inputArrowShotEvent;
+        private GameEvent inputMoveEvent;
+        private GameEvent inputArrowShotEvent;
         private GameEventsManager gameEventsManager;
+
+        private Direction currentMoveDirection;
+        private Direction currentArrowDirection;
 
         void Awake()
         {
-            inputMoveEvent = new InputMoveEvent();
-            inputArrowShotEvent = new InputArrowShotEvent();
+            inputMoveEvent = new GameEvent("InputMoveEvent", new GameEventParameter("Direction", Direction.Up));
+            inputArrowShotEvent = new GameEvent("InputArrowShotEvent", new GameEventParameter("Direction", Direction.Up));
             gameEventsManager = GameEventsManager.Instance;
         }
 
         void Update()
         {
-            inputMoveEvent.Direction = GetCurrentInputMovementDirection();
-            if (inputMoveEvent.Direction != Direction.None)
+            currentMoveDirection = GetCurrentInputMovementDirection();
+            if (currentMoveDirection != Direction.None)
+            {
+                inputMoveEvent.TrySetParameter("Direction", currentMoveDirection);
                 gameEventsManager.DispatchGameEvent(inputMoveEvent);
+            }
 
-            inputArrowShotEvent.Direction = GetCurrentArrowShotDirection();
-            if (inputArrowShotEvent.Direction != Direction.None)
+            currentArrowDirection = GetCurrentArrowShotDirection();
+            if (currentArrowDirection != Direction.None)
+            {
+                inputArrowShotEvent.TrySetParameter("Direction", currentArrowDirection);
                 gameEventsManager.DispatchGameEvent(inputArrowShotEvent);
+            }
 
             if (Input.GetKeyDown(toggleFogVisibilityKey))
-                gameEventsManager.DispatchGameEvent(new InputToggleFogVisibilityEvent());
+                gameEventsManager.DispatchGameEvent(new GameEvent("InputToggleFogVisibilityEvent"));
         }
 
         /// <summary>

@@ -48,7 +48,8 @@ namespace DBGA.MazePlayer
             set
             {
                 positionOnGrid = value;
-                gameEventsManager.DispatchGameEvent(new PlayerExploredTileEvent() { PositionOnGrid = positionOnGrid });
+                gameEventsManager.DispatchGameEvent(new GameEvent("PlayerExploredTileEvent",
+                    new GameEventParameter("PositionOnGrid", positionOnGrid)));
             }
             get => positionOnGrid;
         }
@@ -61,7 +62,8 @@ namespace DBGA.MazePlayer
 
         void Start()
         {
-            gameEventsManager.DispatchGameEvent(new InitializeArrowCountEvent() { RemainingArrows = currentArrowsCount });
+            gameEventsManager.DispatchGameEvent(new GameEvent("InitializeArrowCountEvent",
+                new GameEventParameter("RemainingArrows", currentArrowsCount)));
         }
 
         /// <summary>
@@ -132,7 +134,8 @@ namespace DBGA.MazePlayer
 
             arrow.SetArrowDirection(shotDirection);
             arrow.OwnerPlayerNumber = PlayerNumber;
-            gameEventsManager.DispatchGameEvent(new ArrowShotEvent() { RemainingArrows = currentArrowsCount });
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerLostForNoArrowRemainingEvent",
+                new GameEventParameter("PlayerNumber", currentArrowsCount)));
 
             return true;
         }
@@ -222,7 +225,7 @@ namespace DBGA.MazePlayer
             transform.position = nextPosition3d;
 
             isInMoveAnimation = false;
-            gameEventsManager.DispatchGameEvent(new PlayerCompletedMovementEvent());
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerCompletedMovementEvent"));
         }
 
         /// <summary>
@@ -252,7 +255,7 @@ namespace DBGA.MazePlayer
             }
 
             isInMoveAnimation = false;
-            gameEventsManager.DispatchGameEvent(new PlayerCompletedMovementEvent());
+            gameEventsManager.DispatchGameEvent(new GameEvent("PlayerCompletedMovementEvent"));
         }
 
         /// <summary>

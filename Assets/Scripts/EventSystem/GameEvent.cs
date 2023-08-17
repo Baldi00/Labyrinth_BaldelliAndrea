@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
 namespace DBGA.EventSystem
 {
     /// <summary>
@@ -36,8 +40,42 @@ namespace DBGA.EventSystem
     ///     else if ...
     /// }
     /// </summary>
-    public interface IGameEvent
+    public class GameEvent
     {
+        public string Name { get; }
 
+        private readonly Dictionary<string, object> parameters;
+
+        public GameEvent(string name, params GameEventParameter[] parameters)
+        {
+            Name = name;
+            this.parameters = new Dictionary<string, object>();
+            parameters
+                .ToList<GameEventParameter>()
+                .ForEach(parameter => this.parameters.Add(parameter.Key, parameter.Value));
+        }
+
+        public bool TryGetParameter<T>(string parameterName, out T result)
+        {
+            bool success = parameters.TryGetValue(parameterName, out object temp);
+            if (success)
+                result = (T)temp;
+            else
+            {
+                result = default;
+                UnityEngine.Debug.LogError($"Event {Name} does not contain {parameterName} parameter");
+            }
+
+            return success;
+        }
+
+        public bool TrySetParameter<T>(string parameterName, T parameterValue)
+        {
+            if (!parameters.ContainsKey(parameterName))
+                return false;
+
+            parameters[parameterName] = parameterValue;
+            return true;
+        }
     }
 }

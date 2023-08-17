@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace DBGA.UI
 {
     [DisallowMultipleComponent]
-    public class UIManager : MonoBehaviour, IGameEventsListener
+    public class UIManager : MonoBehaviour
     {
         private sealed class PlayerUIInfoState
         {
@@ -64,26 +64,6 @@ namespace DBGA.UI
             playerNumber.color = Color.blue;
         }
 
-        public void ReceiveGameEvent(IGameEvent gameEvent)
-        {
-            switch (gameEvent)
-            {
-                case PlayerAddedEvent playerAddedEvent:
-                    AddCurrentPlayerNumberUIInfoState(playerAddedEvent.PlayerNumber);
-                    break;
-                case PlayerStartedTurnEvent nextPlayerStartTurnEvent:
-                    HandlePlayerStartedTurnEvent(nextPlayerStartTurnEvent);
-                    break;
-                case InvalidMoveEvent:
-                    invalidMove.Show();
-                    break;
-            }
-
-            HandleSpecialUIUpdatesEvents(gameEvent);
-            HandlePlayerLoseEvents(gameEvent);
-            HandleArrowEvents(gameEvent);
-        }
-
         public void LoadMainMenuScene()
         {
             SceneManager.LoadScene("MainMenuScene");
@@ -91,27 +71,30 @@ namespace DBGA.UI
 
         private void AddGameEventsListeners()
         {
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(MonsterTileAdjacentEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(WellTileAdjacentEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(TeleportTileAdjacentEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredWellTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(EnteredMonsterTileEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(InitializeArrowCountEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowShotEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowCollidedWithMonsterEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(ArrowHitPlayerEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerLostForNoArrowRemainingEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerStartedTurnEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(PlayerAddedEvent));
-            GameEventsManager.Instance.AddGameEventListener(this, typeof(InvalidMoveEvent));
+            GameEventsManager.Instance.AddEventCallback("MonsterTileAdjacentEvent", HandleSpecialUIUpdatesEvents);
+            GameEventsManager.Instance.AddEventCallback("WellTileAdjacentEvent", HandleSpecialUIUpdatesEvents);
+            GameEventsManager.Instance.AddEventCallback("TeleportTileAdjacentEvent", HandleSpecialUIUpdatesEvents);
+            GameEventsManager.Instance.AddEventCallback("EnteredWellTileEvent", HandlePlayerLoseEvents);
+            GameEventsManager.Instance.AddEventCallback("EnteredMonsterTileEvent", HandlePlayerLoseEvents);
+            GameEventsManager.Instance.AddEventCallback("PlayerLostForNoArrowRemainingEvent", HandlePlayerLoseEvents);
+            GameEventsManager.Instance.AddEventCallback("InitializeArrowCountEvent", HandleArrowEvents);
+            GameEventsManager.Instance.AddEventCallback("ArrowShotEvent", HandleArrowEvents);
+            GameEventsManager.Instance.AddEventCallback("ArrowCollidedWithMonsterEvent", HandleWinEvent);
+            GameEventsManager.Instance.AddEventCallback("ArrowHitPlayerEvent", HandleArrowHitPlayerEvent);
+            GameEventsManager.Instance.AddEventCallback("PlayerStartedTurnEvent", HandlePlayerStartedTurnEvent);
+            GameEventsManager.Instance.AddEventCallback("PlayerAddedEvent", AddCurrentPlayerNumberUIInfoState);
+            GameEventsManager.Instance.AddEventCallback("InvalidMoveEvent", HandleInvalidMoveEvent);
         }
 
         /// <summary>
         /// Adds an empty UI info state for the given player 
         /// </summary>
         /// <param name="playerNumber">The player number for which to add the UI info state</param>
-        private void AddCurrentPlayerNumberUIInfoState(int playerNumber)
+        private void AddCurrentPlayerNumberUIInfoState(GameEvent playerAddedEvent)
         {
+            if (!playerAddedEvent.TryGetParameter("PlayerNumber", out int playerNumber))
+                return;
+
             if (!playersUIStates.ContainsKey(playerNumber))
                 playersUIStates.Add(playerNumber,
                     new PlayerUIInfoState() { bloodUiOn = false, windUiOn = false, moldUiOn = false });
@@ -121,33 +104,49 @@ namespace DBGA.UI
         /// Sets up the player number, color, arrows count UI and updates special UI for the current player
         /// </summary>
         /// <param name="playerStartedTurnEvent">The event containing the info about the current player</param>
-        private void HandlePlayerStartedTurnEvent(PlayerStartedTurnEvent playerStartedTurnEvent)
+        private void HandlePlayerStartedTurnEvent(GameEvent playerStartedTurnEvent)
         {
-            currentPlayerNumber = playerStartedTurnEvent.PlayerNumber;
+            if (!playerStartedTurnEvent.TryGetParameter("PlayerNumber", out int currentPlayerNumber))
+                return;
+            if (!playerStartedTurnEvent.TryGetParameter("PlayerColor", out Color playerColor))
+                return;
+            if (!playerStartedTurnEvent.TryGetParameter("PlayerArrowsCount", out int playerArrowsCount))
+                return;
+
             playerNumber.text = $"Player {currentPlayerNumber + 1}";
-            playerNumber.color = playerStartedTurnEvent.PlayerColor;
-            arrowCount.text = $"Arrows: {playerStartedTurnEvent.PlayerArrowsCount}";
+            playerNumber.color = playerColor;
+            arrowCount.text = $"Arrows: {playerArrowsCount}";
             UpdateSpecialUI();
+        }
+
+        private void HandleInvalidMoveEvent(GameEvent gameEvent)
+        {
+            invalidMove.Show();
         }
 
         /// <summary>
         /// Handles the special UI updates events
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandleSpecialUIUpdatesEvents(IGameEvent gameEvent)
+        private void HandleSpecialUIUpdatesEvents(GameEvent gameEvent)
         {
-            switch (gameEvent)
+            if (!gameEvent.TryGetParameter("PlayerNumber", out int playerNumber))
+                return;
+            if (!gameEvent.TryGetParameter("IsPlayerInside", out bool isPlayerInside))
+                return;
+
+            switch (gameEvent.Name)
             {
-                case MonsterTileAdjacentEvent monsterTileAdjacentEvent:
-                    playersUIStates[monsterTileAdjacentEvent.PlayerNumber].bloodUiOn = monsterTileAdjacentEvent.IsPlayerInside;
+                case "MonsterTileAdjacentEvent":
+                    playersUIStates[playerNumber].bloodUiOn = isPlayerInside;
                     UpdateSpecialUI();
                     break;
-                case WellTileAdjacentEvent wellTileAdjacentEvent:
-                    playersUIStates[wellTileAdjacentEvent.PlayerNumber].moldUiOn = wellTileAdjacentEvent.IsPlayerInside;
+                case "WellTileAdjacentEvent":
+                    playersUIStates[playerNumber].moldUiOn = isPlayerInside;
                     UpdateSpecialUI();
                     break;
-                case TeleportTileAdjacentEvent teleportTileAdjacentEvent:
-                    playersUIStates[teleportTileAdjacentEvent.PlayerNumber].windUiOn = teleportTileAdjacentEvent.IsPlayerInside;
+                case "TeleportTileAdjacentEvent":
+                    playersUIStates[playerNumber].windUiOn = isPlayerInside;
                     UpdateSpecialUI();
                     break;
             }
@@ -167,18 +166,21 @@ namespace DBGA.UI
         /// Handles the player lose conditions events
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandlePlayerLoseEvents(IGameEvent gameEvent)
+        private void HandlePlayerLoseEvents(GameEvent gameEvent)
         {
-            switch (gameEvent)
+            if (!gameEvent.TryGetParameter("PlayerNumber", out int playerNumber))
+                return;
+
+            switch (gameEvent.Name)
             {
-                case EnteredWellTileEvent enteredWellTileEvent:
-                    HandleLoseEventsUI(enteredWellTileEvent.PlayerNumber, youLoseWellDescription);
+                case "EnteredWellTileEvent":
+                    HandleLoseEventsUI(playerNumber, youLoseWellDescription);
                     break;
-                case EnteredMonsterTileEvent enteredMonsterTileEvent:
-                    HandleLoseEventsUI(enteredMonsterTileEvent.PlayerNumber, youLoseMonsterDescription);
+                case "EnteredMonsterTileEvent":
+                    HandleLoseEventsUI(playerNumber, youLoseMonsterDescription);
                     break;
-                case PlayerLostForNoArrowRemainingEvent playerLostForNoArrowRemainingEvent:
-                    HandleLoseEventsUI(playerLostForNoArrowRemainingEvent.PlayerNumber, youLoseNoArrowDescription);
+                case "PlayerLostForNoArrowRemainingEvent":
+                    HandleLoseEventsUI(playerNumber, youLoseNoArrowDescription);
                     break;
             }
         }
@@ -187,31 +189,24 @@ namespace DBGA.UI
         /// Handles the events that involves an arrow
         /// </summary>
         /// <param name="gameEvent">Triggered game event to evaluate</param>
-        private void HandleArrowEvents(IGameEvent gameEvent)
+        private void HandleArrowEvents(GameEvent gameEvent)
         {
-            switch (gameEvent)
-            {
-                case ArrowHitPlayerEvent arrowHitPlayerEvent:
-                    HandleArrowHitPlayerEvent(arrowHitPlayerEvent);
-                    break;
-                case ArrowCollidedWithMonsterEvent arrowCollidedWithMonsterEvent:
-                    HandleWinEvent(arrowCollidedWithMonsterEvent.PlayerNumber);
-                    break;
-                case ArrowShotEvent arrowShotEvent:
-                    arrowCount.text = $"Arrows: {arrowShotEvent.RemainingArrows}";
-                    break;
-                case InitializeArrowCountEvent initializeArrowCountEvent:
-                    arrowCount.text = $"Arrows: {initializeArrowCountEvent.RemainingArrows}";
-                    break;
-            }
+            if (!gameEvent.TryGetParameter("RemainingArrows", out int remainingArrows))
+                return;
+
+            if (gameEvent.Name == "ArrowShotEvent" || gameEvent.Name == "InitializeArrowCountEvent")
+                arrowCount.text = $"Arrows: {remainingArrows}";
         }
 
         /// <summary>
         /// If given player number is player 1 shows win UI, the lose UI is shown otherwise
         /// </summary>
         /// <param name="playerNumber">The player that has won</param>
-        private void HandleWinEvent(int playerNumber)
+        private void HandleWinEvent(GameEvent winEvent)
         {
+            if (!winEvent.TryGetParameter("PlayerNumber", out int playerNumber))
+                return;
+
             if (playerNumber == 0)
                 youWinUi.SetActive(true);
             else
@@ -245,9 +240,12 @@ namespace DBGA.UI
         /// </summary>
         /// <param name="arrowHitPlayerEvent">The event containing the player that has been hit</param>
         /// <see cref="HandleLoseEventsUI"/>
-        private void HandleArrowHitPlayerEvent(ArrowHitPlayerEvent arrowHitPlayerEvent)
+        private void HandleArrowHitPlayerEvent(GameEvent arrowHitPlayerEvent)
         {
-            HandleLoseEventsUI(arrowHitPlayerEvent.HitPlayerNumber, youLoseArrowHitPlayerDescription);
+            if (!arrowHitPlayerEvent.TryGetParameter("HitPlayerNumber", out int hitPlayerNumber))
+                return;
+
+            HandleLoseEventsUI(hitPlayerNumber, youLoseArrowHitPlayerDescription);
         }
     }
 }

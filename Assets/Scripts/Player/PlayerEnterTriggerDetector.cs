@@ -20,28 +20,31 @@ namespace DBGA.MazePlayer
             switch (other.tag)
             {
                 case "Monster":
-                    gameEventsManager.DispatchGameEvent(new EnteredMonsterTileEvent()
-                    { PlayerNumber = PlayerNumber });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("EnteredMonsterTileEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber)));
                     break;
                 case "AdjacentMonster":
-                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("MonsterTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", true)));
                     break;
                 case "Well":
-                    gameEventsManager.DispatchGameEvent(new EnteredWellTileEvent()
-                    { PlayerNumber = PlayerNumber });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("EnteredWellTileEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber)));
                     break;
                 case "AdjacentWell":
-                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("WellTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", true)));
                     break;
                 case "Teleport":
-                    gameEventsManager.DispatchGameEvent(new EnteredTeleportTileEvent()
-                    { PlayerNumber = PlayerNumber });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("EnteredTeleportTileEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber)));
                     break;
                 case "AdjacentTeleport":
-                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = true });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("TeleportTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", true)));
                     break;
             }
         }
@@ -51,16 +54,19 @@ namespace DBGA.MazePlayer
             switch (other.tag)
             {
                 case "AdjacentMonster":
-                    gameEventsManager.DispatchGameEvent(new MonsterTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("MonsterTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", false)));
                     break;
                 case "AdjacentWell":
-                    gameEventsManager.DispatchGameEvent(new WellTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("WellTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", false)));
                     break;
                 case "AdjacentTeleport":
-                    gameEventsManager.DispatchGameEvent(new TeleportTileAdjacentEvent()
-                    { PlayerNumber = PlayerNumber, IsPlayerInside = false });
+                    gameEventsManager.DispatchGameEvent(new GameEvent("TeleportTileAdjacentEvent",
+                        new GameEventParameter("PlayerNumber", PlayerNumber),
+                        new GameEventParameter("IsPlayerInside", false)));
                     break;
             }
         }

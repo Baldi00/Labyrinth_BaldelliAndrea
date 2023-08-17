@@ -1,3 +1,4 @@
+using CodiceApp.EventTracking.Plastic;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,77 +20,55 @@ namespace DBGA.EventSystem
             }
         }
 
-        private readonly Dictionary<Type, List<IGameEventsListener>> gameEventsListeners;
+        private readonly Dictionary<string, List<Action<GameEvent>>> eventsCallbacks;
 
         private GameEventsManager()
         {
-            gameEventsListeners = new Dictionary<Type, List<IGameEventsListener>>();
+            eventsCallbacks = new Dictionary<string, List<Action<GameEvent>>>();
         }
 
-        /// <summary>
-        /// Register a listener for the given game event
-        /// </summary>
-        /// <param name="listener">The listener that will be called when the listened game event is raised</param>
-        /// <param name="listenedEventType">The game event that triggers the listener</param>
-        public void AddGameEventListener(IGameEventsListener listener, Type listenedEventType)
+        public void AddEventCallback(string eventName, Action<GameEvent> triggeredCallback)
         {
-            if (!gameEventsListeners.ContainsKey(listenedEventType))
-                gameEventsListeners.Add(listenedEventType, new List<IGameEventsListener>());
+            if (!eventsCallbacks.ContainsKey(eventName))
+                eventsCallbacks.Add(eventName, new List<Action<GameEvent>>());
 
-            gameEventsListeners[listenedEventType].Add(listener);
+            eventsCallbacks[eventName].Add(triggeredCallback);
         }
 
-        /// <summary>
-        /// Removes a listener from the given game event listeners list
-        /// </summary>
-        /// <param name="listener">The listener to remove</param>
-        /// <param name="listenedEventType">The type of the event that is no more listened from the listener</param>
-        public void RemoveGameEventListener(IGameEventsListener listener, Type listenedEventType)
+        public void RemoveEventCallback(string eventName)
         {
-            if (gameEventsListeners.ContainsKey(listenedEventType))
-                gameEventsListeners[listenedEventType].Remove(listener);
+            if (eventsCallbacks.ContainsKey(eventName))
+            {
+                eventsCallbacks[eventName].Clear();
+                eventsCallbacks.Remove(eventName);
+            }
         }
 
-        /// <summary>
-        /// Removes a listener from all the listened game event types
-        /// </summary>
-        /// <param name="listener">The listener to remove</param>
-        public void RemoveGameEventListener(IGameEventsListener listener)
+        public void RemoveEventCallback(string eventName, Action<GameEvent> triggeredCallback)
         {
-            foreach (Type listenedEventType in gameEventsListeners.Keys)
-                RemoveGameEventListener(listener, listenedEventType);
+            if (eventsCallbacks.ContainsKey(eventName))
+                eventsCallbacks[eventName].Remove(triggeredCallback);
         }
 
-        /// <summary>
-        /// Removes all the listeners for a type of game event
-        /// </summary>
-        /// <param name="listenedEventType">The type of the event that will have no more listeners</param>
-        public void RemoveAllGameEventListeners(Type listenedEventType)
+        public void RemoveEventCallbacks(Action<GameEvent> triggeredCallback)
         {
-            if (gameEventsListeners.ContainsKey(listenedEventType))
-                gameEventsListeners[listenedEventType].Clear();
+            foreach (string eventName in eventsCallbacks.Keys)
+                RemoveEventCallback(eventName, triggeredCallback);
         }
 
-        /// <summary>
-        /// Removes all the listeners for all types of game events
-        /// </summary>
-        public void RemoveAllGameEventListeners()
+        public void RemoveEventCallbacks()
         {
-            foreach (Type listenedEventType in gameEventsListeners.Keys)
-                RemoveAllGameEventListeners(listenedEventType);
+            foreach (string eventName in eventsCallbacks.Keys)
+                RemoveEventCallback(eventName);
         }
 
-        /// <summary>
-        /// Receives a game event and dispatches it to the correct listeners
-        /// </summary>
-        /// <param name="gameEvent">The received event</param>
-        public void DispatchGameEvent(IGameEvent gameEvent)
+        public void DispatchGameEvent(GameEvent gameEvent)
         {
-            Type eventType = gameEvent.GetType();
-            if (gameEventsListeners.ContainsKey(eventType))
-                gameEventsListeners[eventType].ForEach(listener => listener.ReceiveGameEvent(gameEvent));
+            string eventName = gameEvent.Name;
+            if (eventsCallbacks.ContainsKey(eventName))
+                eventsCallbacks[eventName].ForEach(callback => callback?.Invoke(gameEvent));
             else
-                Debug.LogWarning("There are no listeners for " + eventType);
+                Debug.LogWarning("There are no listeners for " + eventName);
         }
     }
 }
